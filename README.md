@@ -39,7 +39,7 @@ A modern retrospective tool built with Rails 8, designed to help teams reflect a
 
 5. **Start the development server:**
    ```bash
-   bin/dev
+   rails server
    ```
 
 Visit `http://localhost:3000` to see the application running! 🎉
