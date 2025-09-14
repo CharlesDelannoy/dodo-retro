@@ -30,6 +30,8 @@ A modern retrospective tool built with Rails 8, designed to help teams reflect a
    rails db:migrate
    ```
 
+   > **Note:** This project uses SQL structure files (`db/structure.sql`) instead of `schema.rb` for database schema management. This provides better support for PostgreSQL-specific features like stored procedures, views, and custom types.
+
 4. **Run tests to verify everything works:**
    ```bash
    rspec
