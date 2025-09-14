@@ -1,0 +1,14 @@
+---
+services:
+  postgres:
+    image: postgres:17-alpine
+    mem_limit: 256m
+    volumes:
+      - postgresql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=dodo_retro
+      - POSTGRES_PASSWORD=dodo_retro_pg_passwd
+volumes:
+  postgresql:
