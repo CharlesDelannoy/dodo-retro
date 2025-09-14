@@ -150,9 +150,19 @@ root "home#index"
 psql dodo_retro_development
 ```
 
+## Testing
+- **RSpec** for testing framework
+- **Minimal test suite** - removed unnecessary generated tests
+- **Current tests**:
+  - `spec/models/user_spec.rb` - User model validations and normalizations
+  - `spec/requests/users_spec.rb` - User signup functionality
+  - `spec/requests/home_spec.rb` - Home page access
+- **Removed tests**: View tests, helper tests (all were just pending placeholders)
+
 ## Recent Changes
 - Added username field to users
 - Created signup functionality
 - Updated all authentication redirects to use semantic routes
 - Fixed session resumption on home page
 - Updated sign out button to use proper Turbo syntax
+- Cleaned up test suite - removed unnecessary view/helper tests, improved remaining tests
