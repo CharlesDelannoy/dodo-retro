@@ -1,4 +1,4 @@
-\restrict o19wZdkIlyOAYTDhFLTchwVBqDfmjwDA9S9E6hR5wTsvtEvkliiXFnzl4A6UHiS
+\restrict HM4gtq5boGAiGmZzsvdFpUdgag3kfFUu351c73HArUCcsHkxfPCPNe4Q6dbQcCy
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -82,7 +82,8 @@ CREATE TABLE public.users (
     email_address character varying NOT NULL,
     password_digest character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    username character varying
 );
 
 
@@ -177,11 +178,12 @@ ALTER TABLE ONLY public.sessions
 -- PostgreSQL database dump complete
 --
 
-\unrestrict o19wZdkIlyOAYTDhFLTchwVBqDfmjwDA9S9E6hR5wTsvtEvkliiXFnzl4A6UHiS
+\unrestrict HM4gtq5boGAiGmZzsvdFpUdgag3kfFUu351c73HArUCcsHkxfPCPNe4Q6dbQcCy
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250914140005'),
 ('20250914122748'),
 ('20250914122747');
 

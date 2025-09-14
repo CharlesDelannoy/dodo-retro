@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
+  resources :users, only: [:create]
+  get "signup", to: "users#new"
   get "home/index"
   resource :session
+  get "login", to: "sessions#new"
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
