@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :teams, only: [:index, :new, :create, :show] do
+    collection do
+      post :add_participant_input
+    end
+  end
   resources :users, only: [:create]
   get "signup", to: "users#new"
   get "home/index"

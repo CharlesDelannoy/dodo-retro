@@ -1,4 +1,4 @@
-\restrict HM4gtq5boGAiGmZzsvdFpUdgag3kfFUu351c73HArUCcsHkxfPCPNe4Q6dbQcCy
+\restrict UF4FS1GPzgJCSMPF8kjlbAwRiZTevtGBQif1JXUD5U0UilP7HCcILIDffRrIPdx
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -29,6 +29,38 @@ CREATE TABLE public.ar_internal_metadata (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
+
+
+--
+-- Name: participants; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.participants (
+    id bigint NOT NULL,
+    team_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: participants_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.participants_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: participants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.participants_id_seq OWNED BY public.participants.id;
 
 
 --
@@ -74,6 +106,38 @@ ALTER SEQUENCE public.sessions_id_seq OWNED BY public.sessions.id;
 
 
 --
+-- Name: teams; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.teams (
+    id bigint NOT NULL,
+    name character varying,
+    creator_id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: teams_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.teams_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: teams_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.teams_id_seq OWNED BY public.teams.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -107,10 +171,24 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: participants id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.participants ALTER COLUMN id SET DEFAULT nextval('public.participants_id_seq'::regclass);
+
+
+--
 -- Name: sessions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sessions ALTER COLUMN id SET DEFAULT nextval('public.sessions_id_seq'::regclass);
+
+
+--
+-- Name: teams id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.teams ALTER COLUMN id SET DEFAULT nextval('public.teams_id_seq'::regclass);
 
 
 --
@@ -126,6 +204,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: participants participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.participants
+    ADD CONSTRAINT participants_pkey PRIMARY KEY (id);
 
 
 --
@@ -145,6 +231,14 @@ ALTER TABLE ONLY public.sessions
 
 
 --
+-- Name: teams teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.teams
+    ADD CONSTRAINT teams_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -153,10 +247,38 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: index_participants_on_team_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_participants_on_team_id ON public.participants USING btree (team_id);
+
+
+--
+-- Name: index_participants_on_team_id_and_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_participants_on_team_id_and_user_id ON public.participants USING btree (team_id, user_id);
+
+
+--
+-- Name: index_participants_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_participants_on_user_id ON public.participants USING btree (user_id);
+
+
+--
 -- Name: index_sessions_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_sessions_on_user_id ON public.sessions USING btree (user_id);
+
+
+--
+-- Name: index_teams_on_creator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_teams_on_creator_id ON public.teams USING btree (creator_id);
 
 
 --
@@ -175,14 +297,40 @@ ALTER TABLE ONLY public.sessions
 
 
 --
+-- Name: teams fk_rails_7ecf94116f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.teams
+    ADD CONSTRAINT fk_rails_7ecf94116f FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
+-- Name: participants fk_rails_990c37f108; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.participants
+    ADD CONSTRAINT fk_rails_990c37f108 FOREIGN KEY (team_id) REFERENCES public.teams(id);
+
+
+--
+-- Name: participants fk_rails_b9a3c50f15; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.participants
+    ADD CONSTRAINT fk_rails_b9a3c50f15 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict HM4gtq5boGAiGmZzsvdFpUdgag3kfFUu351c73HArUCcsHkxfPCPNe4Q6dbQcCy
+\unrestrict UF4FS1GPzgJCSMPF8kjlbAwRiZTevtGBQif1JXUD5U0UilP7HCcILIDffRrIPdx
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250914212001'),
+('20250914211949'),
 ('20250914140005'),
 ('20250914122748'),
 ('20250914122747');
