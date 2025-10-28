@@ -10,6 +10,7 @@ class TeamsController < ApplicationController
   end
 
   def create
+    binding.break
     @team = Current.user.created_teams.build(team_params)
 
     if @team.save
@@ -29,6 +30,7 @@ class TeamsController < ApplicationController
 
   def show
     @participants = @team.participants.includes(:user)
+    @pending_invitations = @team.pending_invitations.pending.includes(:inviter)
   end
 
   def add_participant_input
@@ -54,15 +56,27 @@ class TeamsController < ApplicationController
 
     email_addresses.each do |email|
       user = User.find_by(email_address: email.downcase)
+      binding.break
       if user
-        @team.participants.find_or_create_by(user: user)
+        # Add user to team and send email if they're not already a member
+        participant = @team.participants.find_or_create_by(user: user)
+        if participant.previously_new_record?
+          TeamMailer.invitation_existing_user(team: @team, user: user, inviter: Current.user).deliver_later
+        end
       else
+        # Create pending invitation and send email to non-registered users
         missing_users << email
+        invitation = @team.pending_invitations.find_or_create_by(email: email) do |inv|
+          inv.inviter = Current.user
+        end
+        if invitation.previously_new_record?
+          TeamMailer.invitation_new_user(team: @team, email: email, inviter: Current.user).deliver_later
+        end
       end
     end
 
     if missing_users.any?
-      flash[:alert] = "Some participants need to create an account before being added: #{missing_users.join(', ')}"
+      flash[:alert] = "Invitations sent to: #{missing_users.join(', ')}. They'll need to create an account first."
     end
   end
 end

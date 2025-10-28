@@ -1,0 +1,16 @@
+You've been added to a team on Dodo Retrospective!
+===============================================
+
+Hi <%= @user.username %>,
+
+<%= @inviter.username %> has added you to their team on Dodo Retrospective.
+
+Team: <%= @team.name %>
+
+You're now a member and can start collaborating on retrospectives with your team.
+
+View your team here: <%= team_url(@team) %>
+
+---
+
+Dodo Retrospective - Making retrospectives better together

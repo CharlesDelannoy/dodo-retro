@@ -39,68 +39,25 @@
 - `created_at`, `updated_at`
 - **Unique constraint**: team_id + user_id (prevents duplicate memberships)
 
+### PendingInvitations Table
+- `id` (primary key)
+- `team_id` (foreign key to teams, not null)
+- `email` (string, not null)
+- `inviter_id` (foreign key to users, not null)
+- `status` (string, not null, default: 'pending')
+- `created_at`, `updated_at`
+- **Unique constraint**: team_id + email (prevents duplicate invitations)
+- **Indexes**: team_id + email (unique), email
+
 ## Models
 
-### User (`app/models/user.rb`)
-```ruby
-class User < ApplicationRecord
-  has_secure_password
-  has_many :sessions, dependent: :destroy
-  has_many :created_teams, class_name: 'Team', foreign_key: 'creator_id', dependent: :destroy
-  has_many :participants, dependent: :destroy
-  has_many :teams, through: :participants
-
-  validates :email_address, presence: true, uniqueness: true
-  validates :username, presence: true
-
-  normalizes :email_address, with: ->(e) { e.strip.downcase }
-  normalizes :username, with: ->(u) { u.strip }
-end
-```
-
-### Team (`app/models/team.rb`)
-```ruby
-class Team < ApplicationRecord
-  belongs_to :creator, class_name: 'User'
-  has_many :participants, dependent: :destroy
-  has_many :users, through: :participants
-
-  validates :name, presence: true, length: { minimum: 2, maximum: 100 }
-
-  def include_user?(user)
-    participants.exists?(user: user)
-  end
-
-  def add_user(user)
-    participants.find_or_create_by(user: user)
-  end
-end
-```
-
-### Participant (`app/models/participant.rb`)
-```ruby
-class Participant < ApplicationRecord
-  belongs_to :team
-  belongs_to :user
-
-  validates :user_id, uniqueness: { scope: :team_id, message: "is already a member of this team" }
-end
-```
-
-### Session (`app/models/session.rb`)
-```ruby
-class Session < ApplicationRecord
-  belongs_to :user
-end
-```
-
-### Current (`app/models/current.rb`)
-```ruby
-class Current < ActiveSupport::CurrentAttributes
-  attribute :session
-  delegate :user, to: :session, allow_nil: true
-end
-```
+### Key Associations
+- **User**: has many teams (through participants), created_teams, sessions, sent_invitations
+- **Team**: belongs to creator, has many users (through participants), has many pending_invitations
+- **Participant**: join table between User and Team (unique constraint on team_id + user_id)
+- **PendingInvitation**: tracks invitations to non-registered emails, auto-accepted on user signup
+- **Session**: belongs to user, used for authentication
+- **Current**: ActiveSupport::CurrentAttributes for thread-safe current user access
 
 ## Authentication System
 
@@ -144,75 +101,25 @@ end
 - `show` - displays team details and member list
 - `lookup_user` - AJAX endpoint for email-to-user lookup
 - Automatic creator participation when team is created
+- **Email sending**: Sends invitation emails when participants are added
+  - Existing users get `invitation_existing_user` email
+  - Non-registered emails get `invitation_new_user` email
+  - Uses `deliver_later` for async email delivery
 
-## Routes (`config/routes.rb`)
-```ruby
-resources :teams, only: [:index, :new, :create, :show] do
-  collection do
-    get :lookup_user
-  end
-end
-resources :users, only: [:create]
-get "signup", to: "users#new"
-resource :session
-get "login", to: "sessions#new"
-resources :passwords, param: :token
-root "home#index"
-```
+## Key Routes
+- `/teams` - user's teams list (index), create team form (new), process team creation (create)
+- `/teams/:id` - team details (show)
+- `/teams/lookup_user` - AJAX user lookup
+- `/signup` - signup form
+- `/login` - login form
+- `/session` - process login (POST), logout (DELETE)
 
-### Key Routes
-- `/teams` (GET) → `teams#index` - user's teams list
-- `/teams/new` (GET) → `teams#new` - create team form
-- `/teams` (POST) → `teams#create` - process team creation
-- `/teams/:id` (GET) → `teams#show` - team details
-- `/teams/lookup_user` (GET) → `teams#lookup_user` - AJAX user lookup
-- `/signup` (GET) → `users#new` - signup form
-- `/users` (POST) → `users#create` - process signup
-- `/login` (GET) → `sessions#new` - login form
-- `/session` (POST) → `sessions#create` - process login
-- `/session` (DELETE) → `sessions#destroy` - logout
-
-## Views
-
-### Layout & Shared
-- **Navbar** (`app/views/shared/_navbar.html.erb`):
-  - Shows "Welcome, [username]", "Teams" link, and "Sign out" when logged in
-  - Shows "Sign in" when logged out
-  - **Important**: Sign out uses `data: { turbo_method: :delete }`
-
-### Authentication Forms
-- **Login** (`app/views/sessions/new.html.erb`):
-  - Email and password fields
-  - Link to "Sign up to Dodo Retrospective"
-  - Styled with TailwindCSS
-
-- **Signup** (`app/views/users/new.html.erb`):
-  - Email (first), username, password, password confirmation
-  - Username placeholder: "Choose a username"
-  - Validation error display
-  - Link to login page
-  - Styled to match login form
-
-### Team Management
-- **Teams Index** (`app/views/teams/index.html.erb`):
-  - Grid layout of user's teams
-  - Team stats (member count, creation date)
-  - Member avatars preview
-  - Empty state with call-to-action
-  - "Create New Team" button
-
-- **Team Creation** (`app/views/teams/new.html.erb`):
-  - Team name input
-  - Dynamic participant email inputs with Stimulus
-  - Real-time user lookup (shows if email has account)
-  - Add/remove participant functionality
-  - Styled consistent with auth forms
-
-- **Team Details** (`app/views/teams/show.html.erb`):
-  - Team overview with stats cards
-  - Complete member list with roles
-  - Creator badge display
-  - Placeholder sections for future features
+## Views Overview
+- **Navbar**: Shows username, Teams link, Sign out when logged in
+- **Auth Forms**: Login and Signup pages with TailwindCSS styling
+- **Teams Index**: Grid of user's teams with stats, member previews, empty state
+- **Team Creation**: Dynamic participant email inputs with Stimulus, real-time user lookup
+- **Team Details**: Team overview, complete member list with roles, creator badge
 
 ## Key Features Implemented
 1. ✅ User registration with username
@@ -226,6 +133,9 @@ root "home#index"
 9. ✅ Dynamic participant adding with email lookup
 10. ✅ Real-time user validation via Stimulus
 11. ✅ Team membership system with creator roles
+12. ✅ Email invitations for team members (existing and new users)
+13. ✅ Pending invitations system - tracks invitations sent to non-registered emails
+14. ✅ Auto-acceptance of pending invitations when user signs up with matching email
 
 ## Important Notes
 - `Current.user` is available throughout the app via the Current model
@@ -257,14 +167,8 @@ psql dodo_retro_development
   - Form data collection before submission
   - Responsive UI feedback for user existence
 
-## Recent Changes
-- Added username field to users
-- Created signup functionality
-- Updated all authentication redirects to use semantic routes
-- Fixed session resumption on home page
-- Updated sign out button to use proper Turbo syntax
-- Cleaned up test suite - removed unnecessary view/helper tests, improved remaining tests
-- **NEW**: Implemented complete team management system
-- **NEW**: Added dynamic participant management with Stimulus
-- **NEW**: Real-time user lookup functionality
-- **NEW**: Team creation with email-based member invitations
+## Email System
+- **TeamMailer**: invitation_existing_user, invitation_new_user
+- **Development**: letter_opener gem (previews in browser)
+- **Delivery**: deliver_later with Solid Queue
+- **Preview**: http://localhost:3000/rails/mailers/team_mailer

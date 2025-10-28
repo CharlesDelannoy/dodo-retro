@@ -4,10 +4,22 @@ class User < ApplicationRecord
   has_many :created_teams, class_name: 'Team', foreign_key: 'creator_id', dependent: :destroy
   has_many :participants, dependent: :destroy
   has_many :teams, through: :participants
+  has_many :sent_invitations, class_name: 'PendingInvitation', foreign_key: 'inviter_id', dependent: :destroy
 
   validates :email_address, presence: true, uniqueness: true
   validates :username, presence: true
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :username, with: ->(u) { u.strip }
+
+  after_create :accept_pending_invitations
+
+  private
+
+  def accept_pending_invitations
+    PendingInvitation.pending.where(email: email_address).find_each do |invitation|
+      invitation.team.participants.create!(user: self)
+      invitation.accept!
+    end
+  end
 end

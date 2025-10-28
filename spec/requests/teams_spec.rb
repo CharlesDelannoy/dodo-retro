@@ -84,10 +84,38 @@ RSpec.describe "Teams", type: :request do
         expect(created_team.users).to include(existing_user)
       end
 
+      it "creates pending invitation for non-existent users" do
+        expect {
+          post teams_path, params: params_with_emails
+        }.to change(PendingInvitation, :count).by(1)
+
+        created_team = Team.last
+        invitation = PendingInvitation.last
+        expect(invitation.team).to eq(created_team)
+        expect(invitation.email).to eq("nonexistent@example.com")
+        expect(invitation.inviter).to eq(user)
+        expect(invitation.status).to eq("pending")
+      end
+
       it "shows alert for non-existent users" do
         post teams_path, params: params_with_emails
-        expect(flash[:alert]).to include("Some participants need to create an account")
+        expect(flash[:alert]).to include("Invitations sent to")
         expect(flash[:alert]).to include("nonexistent@example.com")
+      end
+
+      it "does not create duplicate pending invitations for same email" do
+        params = {
+          team: { name: "Test Team" },
+          participant_emails: "nonexistent@example.com, nonexistent@example.com"
+        }
+
+        # Should only create 1 pending invitation even though email appears twice
+        expect {
+          post teams_path, params: params
+        }.to change(PendingInvitation, :count).by(1)
+
+        invitation = PendingInvitation.last
+        expect(invitation.email).to eq("nonexistent@example.com")
       end
     end
 

@@ -16,4 +16,19 @@ export default class extends Controller {
       participantInput.remove()
     }
   }
+
+  collectEmails(event) {
+    // Collect all email inputs
+    const emailInputs = document.querySelectorAll('[data-participant-email]')
+    const emails = Array.from(emailInputs)
+      .map(input => input.value.trim())
+      .filter(email => email !== '')
+      .join(',')
+
+    // Set the hidden field value
+    const emailsField = this.emailsFieldTarget
+    emailsField.value = emails
+
+    console.log("Collected emails:", emails)
+  }
 }

@@ -1,7 +1,7 @@
-\restrict UF4FS1GPzgJCSMPF8kjlbAwRiZTevtGBQif1JXUD5U0UilP7HCcILIDffRrIPdx
+\restrict Ot4IQV9QDKwq7c5jSNOoi6eDkOH3Z9DgdypQq9DHLGC63sUqZzOQOvnJRf4oigE
 
 -- Dumped from database version 17.6
--- Dumped by pg_dump version 17.6
+-- Dumped by pg_dump version 18.0
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -61,6 +61,40 @@ CREATE SEQUENCE public.participants_id_seq
 --
 
 ALTER SEQUENCE public.participants_id_seq OWNED BY public.participants.id;
+
+
+--
+-- Name: pending_invitations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pending_invitations (
+    id bigint NOT NULL,
+    team_id bigint NOT NULL,
+    email character varying NOT NULL,
+    inviter_id bigint NOT NULL,
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: pending_invitations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.pending_invitations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pending_invitations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.pending_invitations_id_seq OWNED BY public.pending_invitations.id;
 
 
 --
@@ -178,6 +212,13 @@ ALTER TABLE ONLY public.participants ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
+-- Name: pending_invitations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pending_invitations ALTER COLUMN id SET DEFAULT nextval('public.pending_invitations_id_seq'::regclass);
+
+
+--
 -- Name: sessions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -212,6 +253,14 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 ALTER TABLE ONLY public.participants
     ADD CONSTRAINT participants_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pending_invitations pending_invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pending_invitations
+    ADD CONSTRAINT pending_invitations_pkey PRIMARY KEY (id);
 
 
 --
@@ -268,6 +317,34 @@ CREATE INDEX index_participants_on_user_id ON public.participants USING btree (u
 
 
 --
+-- Name: index_pending_invitations_on_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_pending_invitations_on_email ON public.pending_invitations USING btree (email);
+
+
+--
+-- Name: index_pending_invitations_on_inviter_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_pending_invitations_on_inviter_id ON public.pending_invitations USING btree (inviter_id);
+
+
+--
+-- Name: index_pending_invitations_on_team_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_pending_invitations_on_team_id ON public.pending_invitations USING btree (team_id);
+
+
+--
+-- Name: index_pending_invitations_on_team_id_and_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_pending_invitations_on_team_id_and_email ON public.pending_invitations USING btree (team_id, email);
+
+
+--
 -- Name: index_sessions_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -321,14 +398,31 @@ ALTER TABLE ONLY public.participants
 
 
 --
+-- Name: pending_invitations fk_rails_cbe9e90e83; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pending_invitations
+    ADD CONSTRAINT fk_rails_cbe9e90e83 FOREIGN KEY (inviter_id) REFERENCES public.users(id);
+
+
+--
+-- Name: pending_invitations fk_rails_f1293202b5; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pending_invitations
+    ADD CONSTRAINT fk_rails_f1293202b5 FOREIGN KEY (team_id) REFERENCES public.teams(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict UF4FS1GPzgJCSMPF8kjlbAwRiZTevtGBQif1JXUD5U0UilP7HCcILIDffRrIPdx
+\unrestrict Ot4IQV9QDKwq7c5jSNOoi6eDkOH3Z9DgdypQq9DHLGC63sUqZzOQOvnJRf4oigE
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251008071011'),
 ('20250914212001'),
 ('20250914211949'),
 ('20250914140005'),
