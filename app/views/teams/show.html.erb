@@ -13,8 +13,8 @@
   </div>
 
   <!-- Team Stats Cards -->
-  <div class="grid gap-6 md:grid-cols-3 mb-8">
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+  <div class="grid gap-8 md:grid-cols-3 mb-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
           <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,13 +22,12 @@
           </svg>
         </div>
         <div>
-          <p class="text-2xl font-bold text-gray-900"><%= @team.users.count %></p>
-          <p class="text-sm text-gray-600">Team Members</p>
+          <p class="text-sm text-gray-600"><%= @team.users.count %> Team Members</p>
         </div>
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
           <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +41,7 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
           <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +57,7 @@
   </div>
 
   <!-- Team Members Section -->
-  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-semibold text-gray-900">Team Members</h2>
       <span class="text-sm text-gray-500"><%= pluralize(@team.users.count, 'member') %></span>
@@ -66,15 +65,15 @@
 
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <% @participants.each do |participant| %>
-        <div class="flex items-center space-x-3 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-sm font-semibold text-blue-600">
+        <div class="flex items-center space-x-3 p-4 rounded-xl bg-blue-100 hover:bg-gray-100 transition-colors">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-blue-600">
             <%= participant.user.username.first.upcase %>
           </div>
           <div class="flex-1">
             <p class="font-medium text-gray-900"><%= participant.user.username %></p>
             <p class="text-sm text-gray-500"><%= participant.user.email_address %></p>
             <% if participant.user == @team.creator %>
-              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-200 text-blue-900 mt-1">
                 Creator
               </span>
             <% end %>
@@ -86,7 +85,7 @@
 
   <!-- Pending Invitations Section -->
   <% if @pending_invitations.any? %>
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-900">Pending Invitations</h2>
         <span class="text-sm text-gray-500"><%= pluralize(@pending_invitations.count, 'invitation') %></span>
@@ -94,8 +93,8 @@
 
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <% @pending_invitations.each do |invitation| %>
-          <div class="flex items-center space-x-3 p-4 rounded-xl bg-yellow-50 hover:bg-yellow-100 transition-colors border border-yellow-200">
-            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-sm font-semibold text-yellow-600">
+          <div class="flex items-center space-x-3 p-4 rounded-xl bg-blue-100 hover:bg-gray-100 transition-colors">
+            <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-sm font-semibold text-amber-600">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
@@ -103,7 +102,7 @@
             <div class="flex-1">
               <p class="font-medium text-gray-900"><%= invitation.email %></p>
               <p class="text-xs text-gray-500">Invited by <%= invitation.inviter.username %></p>
-              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-200 text-amber-900 mt-1">
                 Pending
               </span>
             </div>
@@ -129,7 +128,7 @@
   <% end %>
 
   <!-- Recent Activity Section (placeholder for future features) -->
-  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
     <h2 class="text-xl font-semibold text-gray-900 mb-6">Recent Activity</h2>
 
     <div class="text-center py-8">

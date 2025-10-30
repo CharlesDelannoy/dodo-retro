@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <!-- Header -->
   <div class="flex justify-between items-center mb-8">
     <div>
@@ -13,52 +13,53 @@
   <% if @teams.any? %>
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       <% @teams.each do |team| %>
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-200">
-          <!-- Team Header -->
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex-1">
-              <h3 class="text-lg font-semibold text-gray-900 mb-1">
-                <%= link_to team.name, team, class: "hover:text-blue-600 transition-colors" %>
-              </h3>
-              <p class="text-sm text-gray-500">
-                Created by <%= team.creator.username %>
-              </p>
+        <%= link_to team, class: "block" do %>
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl hover:border-blue-200 transition-all duration-200 cursor-pointer">
+            <!-- Team Header -->
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1 hover:text-blue-600 transition-colors">
+                  <%= team.name %>
+                </h3>
+                <p class="text-sm text-gray-500">
+                  Created by <%= team.creator.username %>
+                </p>
+              </div>
+            </div>
+
+            <!-- Team Stats -->
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="flex items-center text-sm text-gray-600">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 9a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <%= pluralize(team.users.count, 'member') %>
+              </div>
+            </div>
+
+            <!-- Team Members Preview -->
+            <div class="flex items-center space-x-2 mb-4">
+              <% team.users.limit(3).each do |user| %>
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium text-blue-600">
+                  <%= user.username.first.upcase %>
+                </div>
+              <% end %>
+              <% if team.users.count > 3 %>
+                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
+                  +<%= team.users.count - 3 %>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+              <span class="text-sm text-blue-600 font-medium"></span>
+              <span class="text-xs text-gray-400">
+                <%= time_ago_in_words(team.created_at) %> ago
+              </span>
             </div>
           </div>
-
-          <!-- Team Stats -->
-          <div class="flex items-center space-x-4 mb-4">
-            <div class="flex items-center text-sm text-gray-600">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 9a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-              <%= pluralize(team.users.count, 'member') %>
-            </div>
-          </div>
-
-          <!-- Team Members Preview -->
-          <div class="flex items-center space-x-2 mb-4">
-            <% team.users.limit(3).each do |user| %>
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium text-blue-600">
-                <%= user.username.first.upcase %>
-              </div>
-            <% end %>
-            <% if team.users.count > 3 %>
-              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
-                +<%= team.users.count - 3 %>
-              </div>
-            <% end %>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex justify-between items-center pt-4 border-t border-gray-100">
-            <%= link_to "View Team", team,
-                       class: "text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors" %>
-            <span class="text-xs text-gray-400">
-              <%= time_ago_in_words(team.created_at) %> ago
-            </span>
-          </div>
-        </div>
+        <% end %>
       <% end %>
     </div>
   <% else %>
