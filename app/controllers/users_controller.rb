@@ -9,7 +9,8 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
-      redirect_to root_path, notice: 'Account created successfully!'
+      start_new_session_for(@user)
+      redirect_to teams_path, notice: "Welcome to Dodo Retro, #{@user.username}! Your account has been created."
     else
       render :new, status: :unprocessable_entity
     end

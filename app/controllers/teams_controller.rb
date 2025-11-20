@@ -10,7 +10,6 @@ class TeamsController < ApplicationController
   end
 
   def create
-    binding.break
     @team = Current.user.created_teams.build(team_params)
 
     if @team.save
@@ -56,7 +55,6 @@ class TeamsController < ApplicationController
 
     email_addresses.each do |email|
       user = User.find_by(email_address: email.downcase)
-      binding.break
       if user
         # Add user to team and send email if they're not already a member
         participant = @team.participants.find_or_create_by(user: user)
