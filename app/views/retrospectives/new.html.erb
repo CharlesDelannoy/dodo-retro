@@ -1,0 +1,85 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Create New Retrospective</h1>
+    <p class="text-gray-600">for <%= @team.name %></p>
+  </div>
+
+  <%= form_with(model: @retrospective, url: team_retrospectives_path(@team), class: "space-y-8") do |form| %>
+    <!-- Error Messages -->
+    <% if @retrospective.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">
+              <%= pluralize(@retrospective.errors.count, "error") %> prevented this retrospective from being created:
+            </h3>
+            <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+              <% @retrospective.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Retrospective Type Selection -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">Choose Retrospective Format</h2>
+
+      <div class="space-y-4">
+        <% @retrospective_types.each do |retro_type| %>
+          <label class="relative flex cursor-pointer rounded-xl border border-gray-300 bg-white p-6 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+            <%= form.radio_button :retrospective_type_id,
+                                  retro_type.id,
+                                  class: "sr-only peer",
+                                  checked: retro_type == @retrospective_types.first %>
+
+            <div class="flex flex-1 items-center">
+              <div class="flex-1">
+                <span class="block text-lg font-semibold text-gray-900 peer-checked:text-blue-600">
+                  <%= retro_type.name %>
+                </span>
+                <span class="mt-1 block text-sm text-gray-600">
+                  <%= retro_type.description %>
+                </span>
+
+                <!-- Category Preview -->
+                <div class="flex gap-2 mt-4">
+                  <% retro_type.retrospective_columns.each do |column| %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium border-2"
+                          style="background-color: <%= column.color %>20; border-color: <%= column.color %>; color: <%= column.color %>;">
+                      <%= column.name %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Radio Button Visual -->
+              <div class="ml-4">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-600">
+                  <div class="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
+                </div>
+              </div>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", team_path(@team),
+                 class: "px-6 py-3 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" %>
+
+      <%= form.submit "Create Retrospective",
+                     class: "px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg" %>
+    </div>
+  <% end %>
+</div>

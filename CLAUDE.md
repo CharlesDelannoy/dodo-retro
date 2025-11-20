@@ -133,9 +133,19 @@
   - Non-registered emails get `invitation_new_user` email
   - Uses `deliver_later` for async email delivery
 
+#### RetrospectivesController (`app/controllers/retrospectives_controller.rb`)
+- `new` - shows retrospective creation form with type selection
+- `create` - creates retrospective for a team, sets current user as creator
+- `show` - displays retrospective details and current step
+- Scoped to team via `set_team` before_action
+- Auto-generates title after creation: `<team_name>-<YYYY-MM-DD>-<creator_username>`
+
 ## Key Routes
 - `/teams` - user's teams list (index), create team form (new), process team creation (create)
 - `/teams/:id` - team details (show)
+- `/teams/:team_id/retrospectives/new` - create retrospective form
+- `/teams/:team_id/retrospectives` - create retrospective (POST)
+- `/retrospectives/:id` - retrospective details (show)
 - `/teams/lookup_user` - AJAX user lookup
 - `/signup` - signup form
 - `/login` - login form
@@ -146,10 +156,12 @@
 - **Auth Forms**: Login and Signup pages with TailwindCSS styling
 - **Teams Index**: Grid of user's teams with stats, member previews, empty state
 - **Team Creation**: Dynamic participant email inputs with Stimulus, real-time user lookup
-- **Team Details**: Team overview, complete member list with roles, creator badge
+- **Team Details**: Team overview, complete member list with roles, creator badge, "Start Retrospective" button
+- **Retrospective Creation**: Format selection (Plus/Minus/Interesting), category preview, team-scoped
+- **Retrospective Show**: Title display, step progress indicator, category grid, placeholder for future step functionality
 
 ## Key Features Implemented
-1. ✅ User registration with username
+1. ✅ User registration with username (auto-login after signup)
 2. ✅ User authentication (login/logout)
 3. ✅ Session management
 4. ✅ Custom routes (`/login`, `/signup`)
@@ -163,6 +175,10 @@
 12. ✅ Email invitations for team members (existing and new users)
 13. ✅ Pending invitations system - tracks invitations sent to non-registered emails
 14. ✅ Auto-acceptance of pending invitations when user signs up with matching email
+15. ✅ Retrospective type system (flexible template configuration)
+16. ✅ Retrospective creation (team-scoped, format selection)
+17. ✅ Default retrospective type seeded (Plus/Minus/Interesting with color-coded categories)
+18. ✅ Auto-generated retrospective titles
 
 ## Important Notes
 - `Current.user` is available throughout the app via the Current model

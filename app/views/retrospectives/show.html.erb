@@ -1,0 +1,81 @@
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @retrospective.title %></h1>
+      <p class="text-gray-600">
+        <%= @retrospective.retrospective_type.name %> •
+        Led by <%= @retrospective.creator.username %> •
+        <%= time_ago_in_words(@retrospective.created_at) %> ago
+      </p>
+    </div>
+
+    <div class="flex items-center space-x-4">
+      <%= link_to "Back to Team", team_path(@retrospective.team),
+                 class: "text-gray-600 hover:text-gray-500 transition-colors" %>
+    </div>
+  </div>
+
+  <!-- Current Step Indicator -->
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-gray-900">Current Step</h2>
+      <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+        <%= @retrospective.current_step.humanize %>
+      </span>
+    </div>
+
+    <!-- Step Progress Bar -->
+    <div class="flex items-center justify-between mt-6">
+      <% steps = %w[ice_breaker ticket_creation ticket_reveal voting discussion completed] %>
+      <% steps.each_with_index do |step, index| %>
+        <div class="flex-1 <%= 'flex items-center' unless index == steps.length - 1 %>">
+          <div class="relative">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center <%= step == @retrospective.current_step ? 'bg-blue-600 text-white' : steps.index(@retrospective.current_step) > index ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600' %>">
+              <%= index + 1 %>
+            </div>
+            <div class="absolute top-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+              <span class="text-xs font-medium text-gray-600"><%= step.humanize %></span>
+            </div>
+          </div>
+          <% unless index == steps.length - 1 %>
+            <div class="flex-1 h-1 mx-2 <%= steps.index(@retrospective.current_step) > index ? 'bg-green-500' : 'bg-gray-300' %>"></div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Categories Preview -->
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">Categories</h2>
+
+    <div class="grid gap-4 md:grid-cols-<%= @retrospective.retrospective_type.retrospective_columns.count %>">
+      <% @retrospective.retrospective_type.retrospective_columns.each do |column| %>
+        <div class="p-6 rounded-xl border-2" style="border-color: <%= column.color %>; background-color: <%= column.color %>10;">
+          <h3 class="text-lg font-semibold mb-2" style="color: <%= column.color %>;">
+            <%= column.name %>
+          </h3>
+          <p class="text-sm text-gray-600">0 tickets</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Placeholder Content (will be developed in future steps) -->
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+    <div class="text-center py-8">
+      <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Retrospective Ready</h3>
+      <p class="text-gray-600 mb-6">
+        The retrospective has been created and is ready to begin.
+        <br>
+        Step-by-step functionality will be implemented next.
+      </p>
+    </div>
+  </div>
+</div>
