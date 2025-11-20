@@ -1,4 +1,4 @@
-\restrict Ot4IQV9QDKwq7c5jSNOoi6eDkOH3Z9DgdypQq9DHLGC63sUqZzOQOvnJRf4oigE
+\restrict 7k0Mk2MbPLNjCwYucLiGgm6faaD1ZuGAHDKetoXk3orfKBQl9igwwEqrVd0xvfX
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.0
@@ -95,6 +95,108 @@ CREATE SEQUENCE public.pending_invitations_id_seq
 --
 
 ALTER SEQUENCE public.pending_invitations_id_seq OWNED BY public.pending_invitations.id;
+
+
+--
+-- Name: retrospective_columns; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retrospective_columns (
+    id bigint NOT NULL,
+    retrospective_type_id bigint NOT NULL,
+    name character varying NOT NULL,
+    color character varying,
+    "position" integer NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: retrospective_columns_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.retrospective_columns_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: retrospective_columns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.retrospective_columns_id_seq OWNED BY public.retrospective_columns.id;
+
+
+--
+-- Name: retrospective_types; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retrospective_types (
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: retrospective_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.retrospective_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: retrospective_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.retrospective_types_id_seq OWNED BY public.retrospective_types.id;
+
+
+--
+-- Name: retrospectives; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.retrospectives (
+    id bigint NOT NULL,
+    team_id bigint NOT NULL,
+    creator_id bigint NOT NULL,
+    retrospective_type_id bigint NOT NULL,
+    title character varying NOT NULL,
+    current_step character varying DEFAULT 'ice_breaker'::character varying NOT NULL,
+    current_revealing_user_id bigint,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: retrospectives_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.retrospectives_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: retrospectives_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.retrospectives_id_seq OWNED BY public.retrospectives.id;
 
 
 --
@@ -219,6 +321,27 @@ ALTER TABLE ONLY public.pending_invitations ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
+-- Name: retrospective_columns id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospective_columns ALTER COLUMN id SET DEFAULT nextval('public.retrospective_columns_id_seq'::regclass);
+
+
+--
+-- Name: retrospective_types id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospective_types ALTER COLUMN id SET DEFAULT nextval('public.retrospective_types_id_seq'::regclass);
+
+
+--
+-- Name: retrospectives id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives ALTER COLUMN id SET DEFAULT nextval('public.retrospectives_id_seq'::regclass);
+
+
+--
 -- Name: sessions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -261,6 +384,30 @@ ALTER TABLE ONLY public.participants
 
 ALTER TABLE ONLY public.pending_invitations
     ADD CONSTRAINT pending_invitations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: retrospective_columns retrospective_columns_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospective_columns
+    ADD CONSTRAINT retrospective_columns_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: retrospective_types retrospective_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospective_types
+    ADD CONSTRAINT retrospective_types_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: retrospectives retrospectives_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives
+    ADD CONSTRAINT retrospectives_pkey PRIMARY KEY (id);
 
 
 --
@@ -345,6 +492,41 @@ CREATE UNIQUE INDEX index_pending_invitations_on_team_id_and_email ON public.pen
 
 
 --
+-- Name: index_retrospective_columns_on_retrospective_type_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrospective_columns_on_retrospective_type_id ON public.retrospective_columns USING btree (retrospective_type_id);
+
+
+--
+-- Name: index_retrospectives_on_creator_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrospectives_on_creator_id ON public.retrospectives USING btree (creator_id);
+
+
+--
+-- Name: index_retrospectives_on_current_revealing_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrospectives_on_current_revealing_user_id ON public.retrospectives USING btree (current_revealing_user_id);
+
+
+--
+-- Name: index_retrospectives_on_retrospective_type_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrospectives_on_retrospective_type_id ON public.retrospectives USING btree (retrospective_type_id);
+
+
+--
+-- Name: index_retrospectives_on_team_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrospectives_on_team_id ON public.retrospectives USING btree (team_id);
+
+
+--
 -- Name: index_sessions_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -366,6 +548,14 @@ CREATE UNIQUE INDEX index_users_on_email_address ON public.users USING btree (em
 
 
 --
+-- Name: retrospective_columns fk_rails_470b40e078; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospective_columns
+    ADD CONSTRAINT fk_rails_470b40e078 FOREIGN KEY (retrospective_type_id) REFERENCES public.retrospective_types(id);
+
+
+--
 -- Name: sessions fk_rails_758836b4f0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -382,11 +572,43 @@ ALTER TABLE ONLY public.teams
 
 
 --
+-- Name: retrospectives fk_rails_8a15682056; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives
+    ADD CONSTRAINT fk_rails_8a15682056 FOREIGN KEY (retrospective_type_id) REFERENCES public.retrospective_types(id);
+
+
+--
+-- Name: retrospectives fk_rails_8f3ace5cb5; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives
+    ADD CONSTRAINT fk_rails_8f3ace5cb5 FOREIGN KEY (current_revealing_user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: retrospectives fk_rails_90feebef67; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives
+    ADD CONSTRAINT fk_rails_90feebef67 FOREIGN KEY (team_id) REFERENCES public.teams(id);
+
+
+--
 -- Name: participants fk_rails_990c37f108; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.participants
     ADD CONSTRAINT fk_rails_990c37f108 FOREIGN KEY (team_id) REFERENCES public.teams(id);
+
+
+--
+-- Name: retrospectives fk_rails_a94d5f0657; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives
+    ADD CONSTRAINT fk_rails_a94d5f0657 FOREIGN KEY (creator_id) REFERENCES public.users(id);
 
 
 --
@@ -417,11 +639,14 @@ ALTER TABLE ONLY public.pending_invitations
 -- PostgreSQL database dump complete
 --
 
-\unrestrict Ot4IQV9QDKwq7c5jSNOoi6eDkOH3Z9DgdypQq9DHLGC63sUqZzOQOvnJRf4oigE
+\unrestrict 7k0Mk2MbPLNjCwYucLiGgm6faaD1ZuGAHDKetoXk3orfKBQl9igwwEqrVd0xvfX
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251120100220'),
+('20251120100219'),
+('20251120100217'),
 ('20251008071011'),
 ('20250914212001'),
 ('20250914211949'),

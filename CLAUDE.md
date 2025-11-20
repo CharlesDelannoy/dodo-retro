@@ -49,15 +49,42 @@
 - **Unique constraint**: team_id + email (prevents duplicate invitations)
 - **Indexes**: team_id + email (unique), email
 
+### RetrospectiveTypes Table
+- `id` (primary key)
+- `name` (string, not null) - e.g., 'Plus/Minus/Interesting', 'Start/Stop/Continue'
+- `description` (text)
+- `created_at`, `updated_at`
+
+### RetrospectiveColumns Table
+- `id` (primary key)
+- `retrospective_type_id` (foreign key, not null)
+- `name` (string, not null) - e.g., 'Plus', 'Minus', 'Interesting'
+- `color` (string) - hex color for UI
+- `position` (integer, not null) - display order
+- `created_at`, `updated_at`
+
+### Retrospectives Table
+- `id` (primary key)
+- `team_id` (foreign key, not null)
+- `creator_id` (foreign key to users, not null) - the leader
+- `retrospective_type_id` (foreign key, not null)
+- `title` (string, not null) - auto-generated: `<team_name>-<YYYY-MM-DD>-<id>`
+- `current_step` (string, not null, default: 'ice_breaker') - values: ice_breaker, ticket_creation, ticket_reveal, voting, discussion, completed
+- `current_revealing_user_id` (foreign key to users, nullable)
+- `created_at`, `updated_at`
+
 ## Models
 
 ### Key Associations
-- **User**: has many teams (through participants), created_teams, sessions, sent_invitations
-- **Team**: belongs to creator, has many users (through participants), has many pending_invitations
+- **User**: has many teams (through participants), created_teams, created_retrospectives, sessions, sent_invitations
+- **Team**: belongs to creator, has many users (through participants), has many pending_invitations, has many retrospectives
 - **Participant**: join table between User and Team (unique constraint on team_id + user_id)
 - **PendingInvitation**: tracks invitations to non-registered emails, auto-accepted on user signup
 - **Session**: belongs to user, used for authentication
 - **Current**: ActiveSupport::CurrentAttributes for thread-safe current user access
+- **RetrospectiveType**: has many retrospective_columns, has many retrospectives
+- **RetrospectiveColumn**: belongs to retrospective_type, ordered by position
+- **Retrospective**: belongs to team, creator (User), retrospective_type, current_revealing_user (User, optional)
 
 ## Authentication System
 

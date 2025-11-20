@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bundle exec rspec:*)"
+      "Bash(bundle exec rspec:*)",
+      "Bash(bin/rails generate:*)",
+      "Bash(bin/rails db:migrate:*)"
     ],
     "deny": [],
     "ask": []

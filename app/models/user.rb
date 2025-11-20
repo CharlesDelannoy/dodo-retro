@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :participants, dependent: :destroy
   has_many :teams, through: :participants
   has_many :sent_invitations, class_name: 'PendingInvitation', foreign_key: 'inviter_id', dependent: :destroy
+  has_many :created_retrospectives, class_name: 'Retrospective', foreign_key: 'creator_id', dependent: :destroy
 
   validates :email_address, presence: true, uniqueness: true
   validates :username, presence: true
