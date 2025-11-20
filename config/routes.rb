@@ -5,7 +5,11 @@ Rails.application.routes.draw do
       post :add_participant_input
     end
   end
-  resources :retrospectives, only: [:show]
+  resources :retrospectives, only: [:show] do
+    member do
+      post :change_ice_breaker_question
+    end
+  end
   resources :users, only: [:create]
   get "signup", to: "users#new"
   get "home/index"

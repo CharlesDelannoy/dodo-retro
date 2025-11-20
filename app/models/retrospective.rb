@@ -12,6 +12,12 @@ class Retrospective < ApplicationRecord
 
   before_create :generate_title
 
+  broadcasts_to ->(retrospective) { [retrospective.team, retrospective] }, inserts_by: :prepend
+
+  def random_ice_breaker_question
+    IceBreakerQuestion.order('RANDOM()').first
+  end
+
   private
 
   def generate_title

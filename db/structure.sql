@@ -1,4 +1,4 @@
-\restrict 7k0Mk2MbPLNjCwYucLiGgm6faaD1ZuGAHDKetoXk3orfKBQl9igwwEqrVd0xvfX
+\restrict uu5GAVbEf40TUR8Ns54PSTzzHYttwSbTBgXZtlPixuKos30bIMgElMHtOtYG20f
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.0
@@ -29,6 +29,38 @@ CREATE TABLE public.ar_internal_metadata (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
+
+
+--
+-- Name: ice_breaker_questions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ice_breaker_questions (
+    id bigint NOT NULL,
+    content text NOT NULL,
+    question_type character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: ice_breaker_questions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ice_breaker_questions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ice_breaker_questions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ice_breaker_questions_id_seq OWNED BY public.ice_breaker_questions.id;
 
 
 --
@@ -242,6 +274,38 @@ ALTER SEQUENCE public.sessions_id_seq OWNED BY public.sessions.id;
 
 
 --
+-- Name: solid_cable_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.solid_cable_messages (
+    id bigint NOT NULL,
+    channel bytea NOT NULL,
+    payload bytea NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    channel_hash bigint NOT NULL
+);
+
+
+--
+-- Name: solid_cable_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.solid_cable_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: solid_cable_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.solid_cable_messages_id_seq OWNED BY public.solid_cable_messages.id;
+
+
+--
 -- Name: teams; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -307,6 +371,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: ice_breaker_questions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ice_breaker_questions ALTER COLUMN id SET DEFAULT nextval('public.ice_breaker_questions_id_seq'::regclass);
+
+
+--
 -- Name: participants id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -349,6 +420,13 @@ ALTER TABLE ONLY public.sessions ALTER COLUMN id SET DEFAULT nextval('public.ses
 
 
 --
+-- Name: solid_cable_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solid_cable_messages ALTER COLUMN id SET DEFAULT nextval('public.solid_cable_messages_id_seq'::regclass);
+
+
+--
 -- Name: teams id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -368,6 +446,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: ice_breaker_questions ice_breaker_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ice_breaker_questions
+    ADD CONSTRAINT ice_breaker_questions_pkey PRIMARY KEY (id);
 
 
 --
@@ -424,6 +510,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: solid_cable_messages solid_cable_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solid_cable_messages
+    ADD CONSTRAINT solid_cable_messages_pkey PRIMARY KEY (id);
 
 
 --
@@ -534,6 +628,27 @@ CREATE INDEX index_sessions_on_user_id ON public.sessions USING btree (user_id);
 
 
 --
+-- Name: index_solid_cable_messages_on_channel; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_solid_cable_messages_on_channel ON public.solid_cable_messages USING btree (channel);
+
+
+--
+-- Name: index_solid_cable_messages_on_channel_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_solid_cable_messages_on_channel_hash ON public.solid_cable_messages USING btree (channel_hash);
+
+
+--
+-- Name: index_solid_cable_messages_on_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_solid_cable_messages_on_created_at ON public.solid_cable_messages USING btree (created_at);
+
+
+--
 -- Name: index_teams_on_creator_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -639,11 +754,15 @@ ALTER TABLE ONLY public.pending_invitations
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 7k0Mk2MbPLNjCwYucLiGgm6faaD1ZuGAHDKetoXk3orfKBQl9igwwEqrVd0xvfX
+\unrestrict uu5GAVbEf40TUR8Ns54PSTzzHYttwSbTBgXZtlPixuKos30bIMgElMHtOtYG20f
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251120105918'),
+('20251120104357'),
+('20251120104014'),
+('20251120103938'),
 ('20251120100220'),
 ('20251120100219'),
 ('20251120100217'),

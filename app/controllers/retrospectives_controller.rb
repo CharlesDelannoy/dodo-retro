@@ -22,6 +22,28 @@ class RetrospectivesController < ApplicationController
 
   def show
     @retrospective = Retrospective.find(params[:id])
+    @is_leader = @retrospective.creator_id == Current.user.id
+  end
+
+  def change_ice_breaker_question
+    @retrospective = Retrospective.find(params[:id])
+
+    # Only leader can change question
+    if @retrospective.creator_id == Current.user.id
+      @question = @retrospective.random_ice_breaker_question
+
+      # Broadcast to ALL users subscribed to this retrospective
+      @retrospective.broadcast_replace_to(
+        [@retrospective.team, @retrospective],
+        target: "ice-breaker-question",
+        partial: "retrospectives/ice_breaker_question",
+        locals: { question: @question }
+      )
+
+      head :ok
+    else
+      head :forbidden
+    end
   end
 
   private
