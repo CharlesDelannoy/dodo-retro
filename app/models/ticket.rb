@@ -5,6 +5,7 @@ class Ticket < ApplicationRecord
   belongs_to :retrospective_column
   belongs_to :author, class_name: "User"
   belongs_to :ticket_group, optional: true
+  has_many :reactions, dependent: :destroy
 
   validates :content, presence: true
 

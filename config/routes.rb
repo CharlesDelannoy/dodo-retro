@@ -13,7 +13,9 @@ Rails.application.routes.draw do
       post :next_revealer
       get :revealer_section
     end
-    resources :tickets, only: [:create, :update, :destroy]
+    resources :tickets, only: [:create, :update, :destroy] do
+      post :reactions, to: "reactions#create"
+    end
   end
   resources :users, only: [:create]
   get "signup", to: "users#new"

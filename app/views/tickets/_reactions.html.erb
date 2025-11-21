@@ -1,0 +1,24 @@
+<div id="ticket_<%= ticket.id %>_reactions" class="flex flex-wrap gap-1 mt-2">
+  <% if ticket.retrospective.current_step == 'ticket_reveal' && ticket.is_revealed? %>
+    <% ticket.reactions.group_by(&:emoji).each do |emoji, reactions| %>
+      <% user_reacted = reactions.any? { |r| r.user_id == Current.user&.id } %>
+      <%= button_to retrospective_ticket_reactions_path(ticket.retrospective, ticket, emoji: emoji),
+                    method: :post,
+                    class: "inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full transition-all duration-200 bg-white #{user_reacted ? '' : 'hover:bg-gray-50'}",
+                    style: user_reacted ? 'border: 1px solid #6b7280;' : '' do %>
+        <span><%= emoji %></span>
+        <span class="font-semibold <%= user_reacted ? 'text-blue-700' : 'text-gray-600' %>"><%= reactions.count %></span>
+      <% end %>
+    <% end %>
+
+    <!-- Add Reaction Button -->
+    <div class="relative inline-block">
+      <button type="button"
+              data-action="click->reactions#togglePicker"
+              data-ticket-id="<%= ticket.id %>"
+              class="inline-flex items-center px-2 py-1 text-xs rounded-full bg-gray-50 border-2 border-dashed border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200">
+        <span class="text-gray-500">😊+</span>
+      </button>
+    </div>
+  <% end %>
+</div>

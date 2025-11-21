@@ -2,8 +2,14 @@
 <%= turbo_frame_tag dom_id(ticket) do %>
   <div class="rounded-xl p-4 shadow-sm border-2 hover:shadow-md transition-shadow cursor-move"
        style="background-color: <%= colors[:bg] %>; border-color: <%= colors[:border] %>;"
+       data-controller="reactions"
+       data-reactions-retrospective-id-value="<%= ticket.retrospective.id %>"
        data-ticket-id="<%= ticket.id %>">
     <p class="text-sm whitespace-pre-wrap" style="color: <%= colors[:text] %>;"><%= ticket.content %></p>
+
+    <!-- Reactions -->
+    <%= render partial: 'tickets/reactions', locals: { ticket: ticket } %>
+
     <div class="flex justify-between items-center mt-3 pt-3 border-t" style="border-color: <%= colors[:border] %>;">
       <span class="text-xs font-medium" style="color: <%= colors[:text] %>;">
         <%= ticket.author.username %>

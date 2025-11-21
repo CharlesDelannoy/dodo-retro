@@ -1,4 +1,4 @@
-\restrict MJOctaL2wf36Xga0WltqavT5eauG3Sj92iWT0LkiVda9wUDnYYonhUHDcijxdmD
+\restrict T4fhOtdFpCDatVv0DBVJfgMjCdzC2AHGzLzdCgFhWB9VKEhlBPqjLTWuigHrcha
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.0
@@ -127,6 +127,39 @@ CREATE SEQUENCE public.pending_invitations_id_seq
 --
 
 ALTER SEQUENCE public.pending_invitations_id_seq OWNED BY public.pending_invitations.id;
+
+
+--
+-- Name: reactions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.reactions (
+    id bigint NOT NULL,
+    ticket_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    emoji character varying NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: reactions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.reactions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: reactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.reactions_id_seq OWNED BY public.reactions.id;
 
 
 --
@@ -463,6 +496,13 @@ ALTER TABLE ONLY public.pending_invitations ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
+-- Name: reactions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reactions ALTER COLUMN id SET DEFAULT nextval('public.reactions_id_seq'::regclass);
+
+
+--
 -- Name: retrospective_columns id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -555,6 +595,14 @@ ALTER TABLE ONLY public.participants
 
 ALTER TABLE ONLY public.pending_invitations
     ADD CONSTRAINT pending_invitations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: reactions reactions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reactions
+    ADD CONSTRAINT reactions_pkey PRIMARY KEY (id);
 
 
 --
@@ -684,6 +732,27 @@ CREATE INDEX index_pending_invitations_on_team_id ON public.pending_invitations 
 --
 
 CREATE UNIQUE INDEX index_pending_invitations_on_team_id_and_email ON public.pending_invitations USING btree (team_id, email);
+
+
+--
+-- Name: index_reactions_on_ticket_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_reactions_on_ticket_id ON public.reactions USING btree (ticket_id);
+
+
+--
+-- Name: index_reactions_on_ticket_id_and_user_id_and_emoji; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_reactions_on_ticket_id_and_user_id_and_emoji ON public.reactions USING btree (ticket_id, user_id, emoji);
+
+
+--
+-- Name: index_reactions_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_reactions_on_user_id ON public.reactions USING btree (user_id);
 
 
 --
@@ -827,6 +896,14 @@ CREATE UNIQUE INDEX index_users_on_email_address ON public.users USING btree (em
 
 
 --
+-- Name: reactions fk_rails_10b2973720; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reactions
+    ADD CONSTRAINT fk_rails_10b2973720 FOREIGN KEY (ticket_id) REFERENCES public.tickets(id);
+
+
+--
 -- Name: retrospective_columns fk_rails_470b40e078; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -915,6 +992,14 @@ ALTER TABLE ONLY public.participants
 
 
 --
+-- Name: reactions fk_rails_9f02fc96a0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reactions
+    ADD CONSTRAINT fk_rails_9f02fc96a0 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: retrospectives fk_rails_a94d5f0657; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -974,11 +1059,12 @@ ALTER TABLE ONLY public.tickets
 -- PostgreSQL database dump complete
 --
 
-\unrestrict MJOctaL2wf36Xga0WltqavT5eauG3Sj92iWT0LkiVda9wUDnYYonhUHDcijxdmD
+\unrestrict T4fhOtdFpCDatVv0DBVJfgMjCdzC2AHGzLzdCgFhWB9VKEhlBPqjLTWuigHrcha
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251121163717'),
 ('20251121155938'),
 ('20251121095435'),
 ('20251121095353'),
