@@ -8,7 +8,9 @@ Rails.application.routes.draw do
   resources :retrospectives, only: [:show] do
     member do
       post :change_ice_breaker_question
+      post :advance_step
     end
+    resources :tickets, only: [:create, :update, :destroy]
   end
   resources :users, only: [:create]
   get "signup", to: "users#new"

@@ -1,4 +1,4 @@
-\restrict uu5GAVbEf40TUR8Ns54PSTzzHYttwSbTBgXZtlPixuKos30bIMgElMHtOtYG20f
+\restrict 8DlkzdyQuhNivrVT4eI0nSSgBWkKoNR1xYP91Ex5cXdsmloILgrm86O7pTxJAvW
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.0
@@ -338,6 +338,41 @@ ALTER SEQUENCE public.teams_id_seq OWNED BY public.teams.id;
 
 
 --
+-- Name: tickets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tickets (
+    id bigint NOT NULL,
+    retrospective_id bigint NOT NULL,
+    retrospective_column_id bigint NOT NULL,
+    author_id bigint NOT NULL,
+    content text NOT NULL,
+    "position" integer DEFAULT 0,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: tickets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.tickets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: tickets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.tickets_id_seq OWNED BY public.tickets.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -434,6 +469,13 @@ ALTER TABLE ONLY public.teams ALTER COLUMN id SET DEFAULT nextval('public.teams_
 
 
 --
+-- Name: tickets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets ALTER COLUMN id SET DEFAULT nextval('public.tickets_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -526,6 +568,14 @@ ALTER TABLE ONLY public.solid_cable_messages
 
 ALTER TABLE ONLY public.teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tickets tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT tickets_pkey PRIMARY KEY (id);
 
 
 --
@@ -656,6 +706,34 @@ CREATE INDEX index_teams_on_creator_id ON public.teams USING btree (creator_id);
 
 
 --
+-- Name: index_tickets_on_author_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_author_id ON public.tickets USING btree (author_id);
+
+
+--
+-- Name: index_tickets_on_retrospective_column_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_retrospective_column_id ON public.tickets USING btree (retrospective_column_id);
+
+
+--
+-- Name: index_tickets_on_retrospective_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_retrospective_id ON public.tickets USING btree (retrospective_id);
+
+
+--
+-- Name: index_tickets_on_retrospective_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_retrospective_id_and_position ON public.tickets USING btree (retrospective_id, "position");
+
+
+--
 -- Name: index_users_on_email_address; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -671,11 +749,27 @@ ALTER TABLE ONLY public.retrospective_columns
 
 
 --
+-- Name: tickets fk_rails_4cf276e8fa; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT fk_rails_4cf276e8fa FOREIGN KEY (retrospective_id) REFERENCES public.retrospectives(id);
+
+
+--
 -- Name: sessions fk_rails_758836b4f0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT fk_rails_758836b4f0 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: tickets fk_rails_762b54b80b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT fk_rails_762b54b80b FOREIGN KEY (author_id) REFERENCES public.users(id);
 
 
 --
@@ -708,6 +802,14 @@ ALTER TABLE ONLY public.retrospectives
 
 ALTER TABLE ONLY public.retrospectives
     ADD CONSTRAINT fk_rails_90feebef67 FOREIGN KEY (team_id) REFERENCES public.teams(id);
+
+
+--
+-- Name: tickets fk_rails_97f11fc876; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT fk_rails_97f11fc876 FOREIGN KEY (retrospective_column_id) REFERENCES public.retrospective_columns(id);
 
 
 --
@@ -754,11 +856,12 @@ ALTER TABLE ONLY public.pending_invitations
 -- PostgreSQL database dump complete
 --
 
-\unrestrict uu5GAVbEf40TUR8Ns54PSTzzHYttwSbTBgXZtlPixuKos30bIMgElMHtOtYG20f
+\unrestrict 8DlkzdyQuhNivrVT4eI0nSSgBWkKoNR1xYP91Ex5cXdsmloILgrm86O7pTxJAvW
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251120163540'),
 ('20251120105918'),
 ('20251120104357'),
 ('20251120104014'),

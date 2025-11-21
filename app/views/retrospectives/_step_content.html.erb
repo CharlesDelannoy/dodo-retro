@@ -1,0 +1,13 @@
+<% case retrospective.current_step %>
+<% when 'ice_breaker' %>
+  <%= render partial: 'retrospectives/ice_breaker_step', locals: { retrospective: retrospective, is_leader: is_leader } %>
+<% when 'ticket_creation' %>
+  <%= render partial: 'retrospectives/ticket_creation_step', locals: { retrospective: retrospective, is_leader: is_leader, columns: columns } %>
+<% else %>
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+    <div class="text-center py-8">
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Current Step: <%= retrospective.current_step.humanize %></h3>
+      <p class="text-gray-600">This step will be implemented next.</p>
+    </div>
+  </div>
+<% end %>

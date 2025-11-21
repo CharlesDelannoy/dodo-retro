@@ -23,6 +23,27 @@ class RetrospectivesController < ApplicationController
   def show
     @retrospective = Retrospective.find(params[:id])
     @is_leader = @retrospective.creator_id == Current.user.id
+    @columns = @retrospective.retrospective_type.retrospective_columns.order(:position)
+  end
+
+  def advance_step
+    @retrospective = Retrospective.find(params[:id])
+
+    if @retrospective.creator_id == Current.user.id
+      @retrospective.advance_to_next_step!
+
+      # Broadcast step change to all users
+      @retrospective.broadcast_replace_to(
+        [@retrospective.team, @retrospective],
+        target: "retrospective-content",
+        partial: "retrospectives/step_content",
+        locals: { retrospective: @retrospective, is_leader: true, columns: @retrospective.retrospective_type.retrospective_columns.order(:position) }
+      )
+
+      head :ok
+    else
+      head :forbidden
+    end
   end
 
   def change_ice_breaker_question
