@@ -11,7 +11,7 @@
     <p class="text-gray-600 mb-8">Let's warm up with a fun question to get everyone talking!</p>
 
     <!-- Question Display -->
-    <%= render partial: 'retrospectives/ice_breaker_question', locals: { question: nil } %>
+    <%= render partial: 'retrospectives/ice_breaker_question', locals: { question: retrospective.current_ice_breaker_question } %>
 
     <!-- Leader Controls -->
     <% if is_leader %>

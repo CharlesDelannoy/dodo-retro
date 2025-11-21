@@ -10,11 +10,29 @@ class TicketsController < ApplicationController
     if @ticket.save
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: turbo_stream.append(
+          streams = []
+
+          # Always append to the column (for ticket_creation phase)
+          streams << turbo_stream.append(
             "column_#{@ticket.retrospective_column_id}_tickets",
             partial: "tickets/ticket",
             locals: { ticket: @ticket }
           )
+
+          # During reveal phase, also reload the revealer-section frame
+          if @retrospective.current_step == 'ticket_reveal'
+            @columns = @retrospective.retrospective_type.retrospective_columns.order(:position)
+            streams << turbo_stream.replace(
+              "revealer-section",
+              template: "retrospectives/revealer_section",
+              locals: {
+                retrospective: @retrospective,
+                columns: @columns
+              }
+            )
+          end
+
+          render turbo_stream: streams
         end
         format.json { head :ok }
       end

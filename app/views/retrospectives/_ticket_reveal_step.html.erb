@@ -53,10 +53,11 @@
 
     <!-- Right Sidebar: Keep Creating -->
     <div style="width: 20vw;">
-      <div class="bg-blue-50 rounded-lg p-3">
-        <h3 class="text-xs font-semibold text-blue-900 mb-2">Keep Creating</h3>
+      <% if retrospective.tickets.unrevealed.where(author_id: Current.user&.id).any? %>
+        <div class="bg-blue-50 rounded-lg p-3">
+          <h3 class="text-xs font-semibold text-blue-900 mb-2">Keep Creating</h3>
 
-        <div class="flex gap-1 mb-3">
+          <div class="flex gap-1 mb-3">
           <% columns.each do |column| %>
             <button data-action="click->tickets#showForm"
                     data-column-id="<%= column.id %>"
@@ -99,6 +100,11 @@
           </form>
         </div>
       </div>
+      <% else %>
+        <div class="bg-gray-50 rounded-lg p-6 text-center">
+          <p class="text-gray-600 text-sm">You've revealed all your tickets! 🎉</p>
+        </div>
+      <% end %>
     </div>
   </div>
 

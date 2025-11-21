@@ -1,4 +1,4 @@
-\restrict 9UKDHcDxr5F0E0ohAp6WkhR0Qn6W3pEDKiJCahy4pWQha84FLgJnJKZddrihdwa
+\restrict MJOctaL2wf36Xga0WltqavT5eauG3Sj92iWT0LkiVda9wUDnYYonhUHDcijxdmD
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.0
@@ -208,7 +208,8 @@ CREATE TABLE public.retrospectives (
     current_step character varying DEFAULT 'ice_breaker'::character varying NOT NULL,
     current_revealing_user_id bigint,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    current_ice_breaker_question_id bigint
 );
 
 
@@ -700,6 +701,13 @@ CREATE INDEX index_retrospectives_on_creator_id ON public.retrospectives USING b
 
 
 --
+-- Name: index_retrospectives_on_current_ice_breaker_question_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_retrospectives_on_current_ice_breaker_question_id ON public.retrospectives USING btree (current_ice_breaker_question_id);
+
+
+--
 -- Name: index_retrospectives_on_current_revealing_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -835,6 +843,14 @@ ALTER TABLE ONLY public.tickets
 
 
 --
+-- Name: retrospectives fk_rails_4f82817a85; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.retrospectives
+    ADD CONSTRAINT fk_rails_4f82817a85 FOREIGN KEY (current_ice_breaker_question_id) REFERENCES public.ice_breaker_questions(id);
+
+
+--
 -- Name: sessions fk_rails_758836b4f0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -958,11 +974,12 @@ ALTER TABLE ONLY public.tickets
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 9UKDHcDxr5F0E0ohAp6WkhR0Qn6W3pEDKiJCahy4pWQha84FLgJnJKZddrihdwa
+\unrestrict MJOctaL2wf36Xga0WltqavT5eauG3Sj92iWT0LkiVda9wUDnYYonhUHDcijxdmD
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251121155938'),
 ('20251121095435'),
 ('20251121095353'),
 ('20251121095311'),

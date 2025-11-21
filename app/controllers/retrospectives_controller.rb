@@ -73,6 +73,9 @@ class RetrospectivesController < ApplicationController
     if @retrospective.creator_id == Current.user.id
       @question = @retrospective.random_ice_breaker_question
 
+      # Save the new question to the database
+      @retrospective.update!(current_ice_breaker_question: @question)
+
       # Broadcast to ALL users subscribed to this retrospective
       @retrospective.broadcast_replace_to(
         [@retrospective.team, @retrospective],

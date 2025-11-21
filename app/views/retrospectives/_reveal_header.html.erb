@@ -1,6 +1,8 @@
 <div class="flex justify-between items-center mb-6"
-     data-controller="reveal-header"
-     data-current-revealing-user-id="<%= retrospective.current_revealing_user_id %>">
+     data-controller="reveal-header reveal-leader-controls"
+     data-current-revealing-user-id="<%= retrospective.current_revealing_user_id %>"
+     data-reveal-leader-controls-creator-id-value="<%= retrospective.creator_id %>"
+     data-reveal-leader-controls-current-user-id-value="<%= Current.user&.id %>">
   <div>
     <h2 class="text-2xl font-bold text-gray-900">Ticket Reveal</h2>
     <% if retrospective.current_revealing_user %>
@@ -17,24 +19,22 @@
     <% end %>
   </div>
 
-  <div class="flex gap-3">
-    <% if Current.user&.id == retrospective.creator_id %>
-      <%= button_to advance_step_retrospective_path(retrospective),
-                    method: :post,
-                    class: "px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-all duration-200 shadow-lg" do %>
-        Continue to Voting
-        <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-        </svg>
-      <% end %>
+  <div class="flex gap-3" data-reveal-leader-controls-target="controls">
+    <%= button_to advance_step_retrospective_path(retrospective),
+                  method: :post,
+                  class: "px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-all duration-200 shadow-lg" do %>
+      Continue to Voting
+      <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+      </svg>
+    <% end %>
 
-      <% if retrospective.current_revealing_user %>
-        <%= button_to next_revealer_retrospective_path(retrospective),
-                      method: :post,
-                      class: "px-4 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200",
-                      data: { turbo_confirm: "Force move to next person?" } do %>
-          Skip to Next Person
-        <% end %>
+    <% if retrospective.current_revealing_user %>
+      <%= button_to next_revealer_retrospective_path(retrospective),
+                    method: :post,
+                    class: "px-4 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200",
+                    data: { turbo_confirm: "Force move to next person?" } do %>
+        Skip to Next Person
       <% end %>
     <% end %>
   </div>

@@ -5,6 +5,7 @@ class Retrospective < ApplicationRecord
   belongs_to :creator, class_name: "User"
   belongs_to :retrospective_type
   belongs_to :current_revealing_user, class_name: "User", optional: true
+  belongs_to :current_ice_breaker_question, class_name: "IceBreakerQuestion", optional: true
   has_many :tickets, dependent: :destroy
 
   validates :current_step, presence: true, inclusion: {
@@ -12,6 +13,7 @@ class Retrospective < ApplicationRecord
   }
 
   before_create :generate_title
+  after_create :set_initial_ice_breaker_question
 
   broadcasts_to ->(retrospective) { [retrospective.team, retrospective] }, inserts_by: :prepend
 
@@ -61,5 +63,12 @@ class Retrospective < ApplicationRecord
 
   def generate_title
     self.title = "#{team.name}-#{Date.today.strftime('%Y-%m-%d')}-#{creator.username}"
+  end
+
+  def set_initial_ice_breaker_question
+    # Only set if we're starting with ice_breaker step
+    if current_step == 'ice_breaker' && current_ice_breaker_question_id.nil?
+      update_column(:current_ice_breaker_question_id, random_ice_breaker_question&.id)
+    end
   end
 end

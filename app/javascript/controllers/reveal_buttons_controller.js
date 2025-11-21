@@ -12,16 +12,38 @@ export default class extends Controller {
     // Listen for reveal-header updates
     this.boundHandleHeaderUpdate = this.handleHeaderUpdate.bind(this)
     document.addEventListener('reveal-header:updated', this.boundHandleHeaderUpdate)
+
+    // Also poll the header periodically in case we miss the event
+    this.pollInterval = setInterval(() => {
+      this.syncWithHeader()
+    }, 500)
   }
 
   disconnect() {
     document.removeEventListener('reveal-header:updated', this.boundHandleHeaderUpdate)
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval)
+    }
   }
 
   handleHeaderUpdate(event) {
     // Update the revealing user ID from the event
     const newRevealingUserId = event.detail.revealingUserId
     this.currentRevealingUserIdValue = newRevealingUserId ? parseInt(newRevealingUserId) : null
+  }
+
+  syncWithHeader() {
+    // Check the reveal-header for the current revealing user ID
+    const revealHeader = document.querySelector('[data-current-revealing-user-id]')
+    if (revealHeader) {
+      const newRevealingUserId = revealHeader.dataset.currentRevealingUserId
+      const parsedId = newRevealingUserId ? parseInt(newRevealingUserId) : null
+
+      // Only update if it's different
+      if (parsedId !== this.currentRevealingUserIdValue) {
+        this.currentRevealingUserIdValue = parsedId
+      }
+    }
   }
 
   currentRevealingUserIdValueChanged() {
