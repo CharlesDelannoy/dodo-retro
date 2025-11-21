@@ -6,14 +6,49 @@ export default class extends Controller {
 
   showForm(event) {
     const columnId = event.currentTarget.dataset.columnId
+    const columnName = event.currentTarget.dataset.columnName
+    const columnColor = event.currentTarget.dataset.columnColor
+
     this.columnIdTarget.value = columnId
     this.contentTarget.value = ""
-    document.getElementById('ticket-form-modal').classList.remove('hidden')
+
+    // Try inline form first (reveal phase), fallback to modal (creation phase)
+    const inlineForm = document.getElementById('inline-ticket-form')
+    const modalForm = document.getElementById('ticket-form-modal')
+
+    if (inlineForm) {
+      inlineForm.classList.remove('hidden')
+
+      // Update the form label to show which column is being created
+      const formColumnName = document.getElementById('form-column-name')
+      if (formColumnName && columnName) {
+        formColumnName.textContent = columnName
+        formColumnName.style.color = columnColor
+      }
+    } else if (modalForm) {
+      modalForm.classList.remove('hidden')
+
+      // Update the modal header to show which column is being created
+      const modalColumnName = document.getElementById('modal-column-name')
+      if (modalColumnName && columnName) {
+        modalColumnName.textContent = columnName
+        modalColumnName.style.color = columnColor
+      }
+    }
+
     this.contentTarget.focus()
   }
 
   closeForm() {
-    document.getElementById('ticket-form-modal').classList.add('hidden')
+    const inlineForm = document.getElementById('inline-ticket-form')
+    const modalForm = document.getElementById('ticket-form-modal')
+
+    if (inlineForm) {
+      inlineForm.classList.add('hidden')
+    }
+    if (modalForm) {
+      modalForm.classList.add('hidden')
+    }
   }
 
   submitTicket(event) {

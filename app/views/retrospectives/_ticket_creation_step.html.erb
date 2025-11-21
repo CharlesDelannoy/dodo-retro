@@ -48,6 +48,8 @@
         <div class="mt-3">
           <button data-action="click->tickets#showForm"
                   data-column-id="<%= column.id %>"
+                  data-column-name="<%= column.name %>"
+                  data-column-color="<%= column.color %>"
                   class="w-full px-4 py-2 border-2 border-dashed rounded-xl text-sm font-medium transition-all duration-200 hover:bg-gray-50"
                   style="border-color: <%= column.color %>; color: <%= column.color %>;">
             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +65,9 @@
   <!-- Ticket Form Modal (Hidden by default) -->
   <div id="ticket-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
-      <h3 class="text-xl font-bold text-gray-900 mb-4">Create Ticket</h3>
+      <h3 class="text-xl font-bold text-gray-900 mb-4">
+        Create Ticket - <span id="modal-column-name" class="font-semibold"></span>
+      </h3>
 
       <form data-tickets-target="form" data-action="submit->tickets#submitTicket">
         <input type="hidden" data-tickets-target="columnId" name="column_id">

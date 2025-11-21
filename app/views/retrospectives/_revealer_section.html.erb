@@ -1,54 +1,64 @@
-<!-- Current Revealer Section (only visible to the person revealing) -->
-<% if retrospective.current_revealing_user_id == Current.user&.id %>
-  <div class="mb-6 bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6">
+<% user_unrevealed_tickets = retrospective.tickets.unrevealed.where(author_id: Current.user&.id) %>
+<% is_my_turn = retrospective.current_revealing_user_id == Current.user&.id %>
+
+<!-- User's Unrevealed Tickets Section - Always visible if user has tickets -->
+<% if user_unrevealed_tickets.any? %>
+  <div class="<%= is_my_turn ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200' %> border-2 rounded-2xl p-5"
+       data-unrevealed-tickets-section>
     <div class="mb-4">
-      <h3 class="text-lg font-semibold text-yellow-900">Your Unrevealed Tickets</h3>
-      <p class="text-yellow-700 text-sm">Click the reveal button on any ticket to share it with the team</p>
+      <h3 class="text-base font-semibold <%= is_my_turn ? 'text-yellow-900' : 'text-gray-900' %>">
+        Your Unrevealed Tickets
+      </h3>
+      <p class="<%= is_my_turn ? 'text-yellow-700' : 'text-gray-600' %> text-xs mt-1"
+         data-helper-text>
+        <%= is_my_turn ? 'Click reveal button to share' : 'Waiting for your turn' %>
+      </p>
     </div>
 
-    <div class="space-y-3">
-      <% retrospective.tickets.unrevealed.where(author_id: Current.user.id).each do |ticket| %>
-        <% colors = user_color(ticket.author) %>
-        <div class="rounded-xl p-4 shadow-sm border-2"
-             style="background-color: <%= colors[:bg] %>; border-color: <%= colors[:border] %>;">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <p class="font-medium" style="color: <%= colors[:text] %>;"><%= ticket.content %></p>
-              <p class="text-sm mt-1" style="color: <%= colors[:text] %>;">
-                <%= ticket.retrospective_column.name %>
-              </p>
+    <!-- Tickets grouped by column/category -->
+    <div class="space-y-4">
+      <% columns.each do |column| %>
+        <% column_tickets = user_unrevealed_tickets.where(retrospective_column_id: column.id) %>
+        <% if column_tickets.any? %>
+          <div class="space-y-2">
+            <!-- Column Header -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background-color: <%= column.color %>20;">
+              <div class="w-2 h-2 rounded-full" style="background-color: <%= column.color %>;"></div>
+              <span class="text-xs font-semibold" style="color: <%= column.color %>;">
+                <%= column.name %> (<%= column_tickets.count %>)
+              </span>
             </div>
 
-            <%= button_to reveal_ticket_retrospective_path(retrospective, ticket_id: ticket.id),
-                          method: :post,
-                          class: "flex-shrink-0 px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-all duration-200 shadow" do %>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
+            <!-- Tickets in this column -->
+            <% column_tickets.each do |ticket| %>
+              <% colors = user_color(ticket.author) %>
+              <div class="rounded-xl p-4 shadow-sm border-2"
+                   style="background-color: <%= colors[:bg] %>; border-color: <%= colors[:border] %>;">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex-1">
+                    <p class="text-sm leading-relaxed" style="color: <%= colors[:text] %>;"><%= ticket.content %></p>
+                  </div>
+
+                  <form action="<%= reveal_ticket_retrospective_path(retrospective, ticket_id: ticket.id) %>"
+                        method="post"
+                        data-reveal-button
+                        class="flex-shrink-0 <%= 'hidden' unless is_my_turn %>">
+                    <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                    <button type="submit"
+                            class="p-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-all duration-200 shadow flex items-center justify-center"
+                            style="width: 30px;"
+                            title="Reveal this ticket">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
             <% end %>
           </div>
-        </div>
-      <% end %>
-    </div>
-  </div>
-<% elsif retrospective.current_revealing_user_id.present? %>
-  <!-- Continue Creating Tickets (for non-revealers) -->
-  <div class="mb-6 bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
-    <h3 class="text-lg font-semibold text-blue-900 mb-2">Keep Creating</h3>
-    <p class="text-blue-700 text-sm mb-4">While others are revealing, you can continue creating tickets</p>
-
-    <div class="grid gap-4 md:grid-cols-<%= retrospective.retrospective_type.retrospective_columns.count %>">
-      <% retrospective.retrospective_type.retrospective_columns.order(:position).each do |column| %>
-        <button data-action="click->tickets#showForm"
-                data-column-id="<%= column.id %>"
-                class="px-4 py-3 border-2 border-dashed rounded-xl text-sm font-medium transition-all duration-200 hover:bg-white"
-                style="border-color: <%= column.color %>; color: <%= column.color %>;">
-          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>
-          Add to <%= column.name %>
-        </button>
+        <% end %>
       <% end %>
     </div>
   </div>

@@ -4,14 +4,25 @@
     <%= render partial: 'retrospectives/reveal_header', locals: { retrospective: retrospective, is_leader: is_leader } %>
   <% end %>
 
-  <!-- Revealer Section -->
-  <%= turbo_frame_tag "revealer-section" do %>
-    <%= render partial: 'retrospectives/revealer_section', locals: { retrospective: retrospective } %>
-  <% end %>
+  <!-- Three Column Layout: Left unrevealed, Middle revealed, Right create -->
+  <div class="flex gap-4 items-start justify-between">
+    <!-- Left Sidebar: User's Unrevealed Tickets -->
+    <div style="width: 20vw;">
+      <%= turbo_frame_tag "revealer-section",
+                          src: revealer_section_retrospective_path(retrospective),
+                          loading: :lazy,
+                          data: {
+                            controller: "reveal-buttons",
+                            "reveal-buttons-current-user-id-value": Current.user&.id,
+                            "reveal-buttons-current-revealing-user-id-value": retrospective.current_revealing_user_id
+                          } do %>
+        <div class="text-center py-8 text-gray-500">Loading...</div>
+      <% end %>
+    </div>
 
-  <!-- Revealed Tickets Grid -->
-  <div>
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Revealed Tickets</h3>
+    <!-- Middle: Revealed Tickets Grid -->
+    <div style="width: 55vw;">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Revealed Tickets</h3>
 
     <div class="grid gap-6 md:grid-cols-<%= columns.count %>">
       <% columns.each do |column| %>
@@ -37,6 +48,57 @@
           </div>
         </div>
       <% end %>
+    </div>
+    </div>
+
+    <!-- Right Sidebar: Keep Creating -->
+    <div style="width: 20vw;">
+      <div class="bg-blue-50 rounded-lg p-3">
+        <h3 class="text-xs font-semibold text-blue-900 mb-2">Keep Creating</h3>
+
+        <div class="flex gap-1 mb-3">
+          <% columns.each do |column| %>
+            <button data-action="click->tickets#showForm"
+                    data-column-id="<%= column.id %>"
+                    data-column-name="<%= column.name %>"
+                    data-column-color="<%= column.color %>"
+                    class="px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:bg-white"
+                    style="width: 33%; color: <%= column.color %>;">
+              <%= column.name %>
+            </button>
+          <% end %>
+        </div>
+
+        <!-- Inline Ticket Form (Hidden by default) -->
+        <div id="inline-ticket-form" class="hidden">
+          <form data-tickets-target="form" data-action="submit->tickets#submitTicket" class="bg-white rounded-lg p-3 border border-gray-100">
+            <input type="hidden" data-tickets-target="columnId" name="column_id">
+
+            <div class="mb-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                New Ticket - <span id="form-column-name" class="font-semibold"></span>
+              </label>
+              <textarea data-tickets-target="content"
+                        name="content"
+                        rows="4"
+                        class="w-full px-2 py-1.5 text-sm border border-gray-100 rounded
+                        placeholder="What's on your mind?"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2">
+              <button type="button"
+                      data-action="click->tickets#closeForm"
+                      class="px-3 py-1 text-xs border border-gray-300 rounded text-gray-700 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button type="submit"
+                      class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                Create
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 

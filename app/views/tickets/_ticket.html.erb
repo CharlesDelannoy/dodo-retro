@@ -8,7 +8,7 @@
       <span class="text-xs font-medium" style="color: <%= colors[:text] %>;">
         <%= ticket.author.username %>
       </span>
-      <% if ticket.author_id == Current.user.id %>
+      <% if ticket.author_id == Current.user.id && ticket.retrospective.current_step == 'ticket_creation' %>
         <%= button_to retrospective_ticket_path(ticket.retrospective, ticket),
                       method: :delete,
                       data: { turbo_confirm: "Are you sure?" },

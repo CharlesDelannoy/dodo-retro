@@ -179,6 +179,45 @@
 16. ✅ Retrospective creation (team-scoped, format selection)
 17. ✅ Default retrospective type seeded (Plus/Minus/Interesting with color-coded categories)
 18. ✅ Auto-generated retrospective titles
+19. ✅ Ice breaker phase - random questions, leader can change
+20. ✅ Ticket creation phase - private, color-coded by user, real-time creation
+21. ✅ Ticket reveal phase - sequential reveal with random user selection
+22. ✅ Real-time Turbo Streams with Solid Cable (PostgreSQL-backed)
+23. ✅ User-specific views during reveal (each user sees only their own unrevealed tickets)
+
+## Retrospective Flow
+
+### Phase 1: Ice Breaker (ice_breaker)
+- Random question displayed from IceBreakerQuestion table
+- Leader can change question via AJAX (broadcasts to all users)
+- Advance to ticket creation when ready
+
+### Phase 2: Ticket Creation (ticket_creation)
+- Users create tickets privately in color-coded columns
+- Each user sees ONLY their own tickets during this phase
+- Color-coded tickets by user (10 distinct pale color schemes in TicketsHelper)
+- Real-time creation via Stimulus controller
+- Tickets are NOT broadcast during creation (private)
+- Users can delete their tickets during this phase only
+
+### Phase 3: Ticket Reveal (ticket_reveal)
+- Random person selected to reveal their tickets first
+- Each user ALWAYS sees their own unrevealed tickets (in gray when not their turn)
+- Reveal buttons (eye icon) only appear when it's user's turn (yellow highlight)
+- User can choose which ticket to reveal (individual reveal buttons)
+- When user finishes revealing, next random person is selected
+- Everyone can continue creating tickets during reveal phase
+- Revealed tickets appear in real-time for all users via Turbo Streams
+- Tickets cannot be deleted after reveal phase starts
+- Leader can force skip to next person
+- **Key implementation**: revealer-section is NOT broadcast - each user's view is independent using Stimulus controller
+
+### Real-time Updates Implementation
+- **reveal-header**: Turbo Frame that broadcasts to all users showing whose turn it is
+- **revealer-section**: Regular div (not Turbo Frame) that stays user-specific, updated via:
+  - Stimulus controller (`reveal_buttons_controller.js`) that listens to header changes
+  - Only responds with turbo_stream to the user who revealed (updates their ticket list)
+- **revealed tickets**: Broadcast append_to all users when ticket is revealed (via Ticket model)
 
 ## Important Notes
 - `Current.user` is available throughout the app via the Current model
@@ -209,6 +248,19 @@ psql dodo_retro_development
   - Real-time email validation and user lookup
   - Form data collection before submission
   - Responsive UI feedback for user existence
+
+- **tickets** (`app/javascript/controllers/tickets_controller.js`):
+  - Show/hide ticket creation modal
+  - Submit ticket via AJAX
+  - Column ID tracking for ticket assignment
+
+- **reveal-buttons** (`app/javascript/controllers/reveal_buttons_controller.js`):
+  - Manages reveal button visibility during ticket reveal phase
+  - Listens to reveal-header Turbo Frame updates
+  - Shows/hides reveal buttons based on whose turn it is
+  - Updates section styling (gray when waiting, yellow when your turn)
+  - Updates helper text dynamically
+  - Ensures each user only sees controls for their own tickets
 
 ## Email System
 - **TeamMailer**: invitation_existing_user, invitation_new_user

@@ -31,16 +31,36 @@ class RetrospectivesController < ApplicationController
 
     if @retrospective.creator_id == Current.user.id
       @retrospective.advance_to_next_step!
+      @retrospective.reload
+      @columns = @retrospective.retrospective_type.retrospective_columns.order(:position)
 
-      # Broadcast step change to all users
+      # Broadcast step change to all non-leader users
       @retrospective.broadcast_replace_to(
         [@retrospective.team, @retrospective],
         target: "retrospective-content",
         partial: "retrospectives/step_content",
-        locals: { retrospective: @retrospective, is_leader: true, columns: @retrospective.retrospective_type.retrospective_columns.order(:position) }
+        locals: {
+          retrospective: @retrospective,
+          is_leader: false,
+          columns: @columns
+        }
       )
 
-      head :ok
+      # Respond with turbo stream to update the leader's view
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "retrospective-content",
+            partial: "retrospectives/step_content",
+            locals: {
+              retrospective: @retrospective,
+              is_leader: true,
+              columns: @columns
+            }
+          )
+        end
+        format.html { redirect_to @retrospective }
+      end
     else
       head :forbidden
     end
@@ -78,29 +98,23 @@ class RetrospectivesController < ApplicationController
         @ticket.reveal!
 
         # Check if current revealer has more tickets
+        revealer_changed = false
         unless @retrospective.current_revealer_has_more_tickets?
           @retrospective.select_next_revealer!
+          revealer_changed = true
+
+          # Broadcast header update to all users when revealer changes
+          @retrospective.broadcast_replace_to(
+            [@retrospective.team, @retrospective],
+            target: "reveal-header",
+            partial: "retrospectives/reveal_header",
+            locals: { retrospective: @retrospective }
+          )
         end
 
-        # Broadcast header update to all users
-        @retrospective.broadcast_replace_to(
-          [@retrospective.team, @retrospective],
-          target: "reveal-header",
-          partial: "retrospectives/reveal_header",
-          locals: { retrospective: @retrospective }
-        )
-
-        # Respond with turbo stream to refresh the current user's unrevealed section
-        respond_to do |format|
-          format.turbo_stream do
-            render turbo_stream: turbo_stream.replace(
-              "revealer-section",
-              partial: "retrospectives/revealer_section",
-              locals: { retrospective: @retrospective }
-            )
-          end
-          format.html { head :ok }
-        end
+        # Reload the revealer-section turbo frame for the current user
+        # Since the form is inside the frame, this response will be captured by the frame
+        redirect_to revealer_section_retrospective_path(@retrospective), status: :see_other
       else
         head :not_found
       end
@@ -116,7 +130,8 @@ class RetrospectivesController < ApplicationController
     if @retrospective.creator_id == Current.user.id
       @retrospective.select_next_revealer!
 
-      # Broadcast header update to all users
+      # Broadcast header update to all users - this shows whose turn it is
+      # The Stimulus controller will react to this and show/hide reveal buttons
       @retrospective.broadcast_replace_to(
         [@retrospective.team, @retrospective],
         target: "reveal-header",
@@ -124,18 +139,17 @@ class RetrospectivesController < ApplicationController
         locals: { retrospective: @retrospective }
       )
 
-      # Broadcast revealer section update to all users
-      @retrospective.broadcast_replace_to(
-        [@retrospective.team, @retrospective],
-        target: "revealer-section",
-        partial: "retrospectives/revealer_section",
-        locals: { retrospective: @retrospective }
-      )
-
       head :ok
     else
       head :forbidden
     end
+  end
+
+  def revealer_section
+    @retrospective = Retrospective.find(params[:id])
+    @columns = @retrospective.retrospective_type.retrospective_columns.order(:position)
+
+    render turbo_frame: "revealer-section", layout: false
   end
 
   private

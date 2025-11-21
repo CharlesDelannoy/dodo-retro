@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       post :advance_step
       post :reveal_ticket
       post :next_revealer
+      get :revealer_section
     end
     resources :tickets, only: [:create, :update, :destroy]
   end

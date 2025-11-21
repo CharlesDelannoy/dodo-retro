@@ -1,0 +1,8 @@
+<%= turbo_frame_tag "revealer-section",
+                    data: {
+                      controller: "reveal-buttons",
+                      "reveal-buttons-current-user-id-value": Current.user&.id,
+                      "reveal-buttons-current-revealing-user-id-value": @retrospective.current_revealing_user_id
+                    } do %>
+  <%= render partial: 'retrospectives/revealer_section', locals: { retrospective: @retrospective, columns: @columns } %>
+<% end %>
