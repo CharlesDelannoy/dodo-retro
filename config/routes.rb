@@ -9,6 +9,8 @@ Rails.application.routes.draw do
     member do
       post :change_ice_breaker_question
       post :advance_step
+      post :reveal_ticket
+      post :next_revealer
     end
     resources :tickets, only: [:create, :update, :destroy]
   end

@@ -67,6 +67,77 @@ class RetrospectivesController < ApplicationController
     end
   end
 
+  def reveal_ticket
+    @retrospective = Retrospective.find(params[:id])
+
+    # Only current revealer can reveal their tickets
+    if @retrospective.current_revealing_user_id == Current.user.id
+      @ticket = @retrospective.tickets.unrevealed.where(author_id: Current.user.id).find(params[:ticket_id])
+
+      if @ticket
+        @ticket.reveal!
+
+        # Check if current revealer has more tickets
+        unless @retrospective.current_revealer_has_more_tickets?
+          @retrospective.select_next_revealer!
+        end
+
+        # Broadcast header update to all users
+        @retrospective.broadcast_replace_to(
+          [@retrospective.team, @retrospective],
+          target: "reveal-header",
+          partial: "retrospectives/reveal_header",
+          locals: { retrospective: @retrospective }
+        )
+
+        # Respond with turbo stream to refresh the current user's unrevealed section
+        respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.replace(
+              "revealer-section",
+              partial: "retrospectives/revealer_section",
+              locals: { retrospective: @retrospective }
+            )
+          end
+          format.html { head :ok }
+        end
+      else
+        head :not_found
+      end
+    else
+      head :forbidden
+    end
+  end
+
+  def next_revealer
+    @retrospective = Retrospective.find(params[:id])
+
+    # Only leader can force move to next revealer
+    if @retrospective.creator_id == Current.user.id
+      @retrospective.select_next_revealer!
+
+      # Broadcast header update to all users
+      @retrospective.broadcast_replace_to(
+        [@retrospective.team, @retrospective],
+        target: "reveal-header",
+        partial: "retrospectives/reveal_header",
+        locals: { retrospective: @retrospective }
+      )
+
+      # Broadcast revealer section update to all users
+      @retrospective.broadcast_replace_to(
+        [@retrospective.team, @retrospective],
+        target: "revealer-section",
+        partial: "retrospectives/revealer_section",
+        locals: { retrospective: @retrospective }
+      )
+
+      head :ok
+    else
+      head :forbidden
+    end
+  end
+
   private
 
   def set_team

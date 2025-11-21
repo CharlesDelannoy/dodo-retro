@@ -3,6 +3,8 @@
   <%= render partial: 'retrospectives/ice_breaker_step', locals: { retrospective: retrospective, is_leader: is_leader } %>
 <% when 'ticket_creation' %>
   <%= render partial: 'retrospectives/ticket_creation_step', locals: { retrospective: retrospective, is_leader: is_leader, columns: columns } %>
+<% when 'ticket_reveal' %>
+  <%= render partial: 'retrospectives/ticket_reveal_step', locals: { retrospective: retrospective, is_leader: is_leader, columns: columns } %>
 <% else %>
   <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
     <div class="text-center py-8">

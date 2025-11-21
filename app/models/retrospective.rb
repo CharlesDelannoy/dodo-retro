@@ -39,7 +39,8 @@ class Retrospective < ApplicationRecord
 
   def select_next_revealer!
     # Get all team members who have unrevealed tickets
-    user_ids_with_tickets = tickets.unrevealed.distinct.pluck(:author_id)
+    # Use reorder to clear the default_scope ordering before distinct
+    user_ids_with_tickets = tickets.unrevealed.reorder(nil).distinct.pluck(:author_id)
 
     if user_ids_with_tickets.any?
       # Randomly select next person

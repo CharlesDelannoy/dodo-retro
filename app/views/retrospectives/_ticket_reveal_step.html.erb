@@ -1,0 +1,74 @@
+<div class="mb-8" data-controller="tickets" data-tickets-retrospective-id-value="<%= retrospective.id %>">
+  <!-- Header -->
+  <%= turbo_frame_tag "reveal-header" do %>
+    <%= render partial: 'retrospectives/reveal_header', locals: { retrospective: retrospective, is_leader: is_leader } %>
+  <% end %>
+
+  <!-- Revealer Section -->
+  <%= turbo_frame_tag "revealer-section" do %>
+    <%= render partial: 'retrospectives/revealer_section', locals: { retrospective: retrospective } %>
+  <% end %>
+
+  <!-- Revealed Tickets Grid -->
+  <div>
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Revealed Tickets</h3>
+
+    <div class="grid gap-6 md:grid-cols-<%= columns.count %>">
+      <% columns.each do |column| %>
+        <div class="flex flex-col">
+          <!-- Column Header -->
+          <div class="rounded-t-2xl p-4 border-2 border-b-0" style="border-color: <%= column.color %>; background-color: <%= column.color %>20;">
+            <h4 class="text-lg font-semibold text-center" style="color: <%= column.color %>;">
+              <%= column.name %>
+            </h4>
+          </div>
+
+          <!-- Revealed Tickets Container -->
+          <div id="revealed-column-<%= column.id %>"
+               class="flex-1 bg-gray-50 rounded-b-2xl p-4 border-2 border-t-0 space-y-3 min-h-[300px]"
+               style="border-color: <%= column.color %>;">
+
+            <%= turbo_frame_tag "revealed_column_#{column.id}_tickets" do %>
+              <!-- Show only revealed tickets -->
+              <% retrospective.tickets.revealed.where(retrospective_column_id: column.id).each do |ticket| %>
+                <%= render partial: 'tickets/ticket', locals: { ticket: ticket } %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Ticket Form Modal (Hidden by default) - Reuse from ticket creation -->
+  <div id="ticket-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Create Ticket</h3>
+
+      <form data-tickets-target="form" data-action="submit->tickets#submitTicket">
+        <input type="hidden" data-tickets-target="columnId" name="column_id">
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+          <textarea data-tickets-target="content"
+                    name="content"
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="What's on your mind?"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button"
+                  data-action="click->tickets#closeForm"
+                  class="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">
+            Create Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -33,12 +33,14 @@ class Ticket < ApplicationRecord
   end
 
   def broadcast_ticket_updated
-    # Broadcast revealed ticket to all users
-    broadcast_replace_to(
-      [retrospective.team, retrospective],
-      target: self,
-      partial: "tickets/ticket",
-      locals: { ticket: self }
-    )
+    # When ticket is revealed, append it to the revealed column for all users
+    if is_revealed?
+      broadcast_append_to(
+        [retrospective.team, retrospective],
+        target: "revealed-column-#{retrospective_column_id}",
+        partial: "tickets/ticket",
+        locals: { ticket: self }
+      )
+    end
   end
 end
