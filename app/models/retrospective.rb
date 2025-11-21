@@ -29,7 +29,31 @@ class Retrospective < ApplicationRecord
                else current_step
                end
 
+    # When advancing to reveal, select first random revealer
+    if new_step == 'ticket_reveal'
+      select_next_revealer!
+    end
+
     update!(current_step: new_step)
+  end
+
+  def select_next_revealer!
+    # Get all team members who have unrevealed tickets
+    user_ids_with_tickets = tickets.unrevealed.distinct.pluck(:author_id)
+
+    if user_ids_with_tickets.any?
+      # Randomly select next person
+      next_user_id = user_ids_with_tickets.sample
+      update!(current_revealing_user_id: next_user_id)
+    else
+      # No more tickets to reveal, clear revealer
+      update!(current_revealing_user_id: nil)
+    end
+  end
+
+  def current_revealer_has_more_tickets?
+    return false unless current_revealing_user_id
+    tickets.unrevealed.where(author_id: current_revealing_user_id).exists?
   end
 
   private

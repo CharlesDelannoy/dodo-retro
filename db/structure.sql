@@ -1,4 +1,4 @@
-\restrict 8DlkzdyQuhNivrVT4eI0nSSgBWkKoNR1xYP91Ex5cXdsmloILgrm86O7pTxJAvW
+\restrict f9VqjDHy3Mi22jUkAsQ5IhLVIazacDtnxPtQCNMnXItZEb5xfiInAtMSfYvWCcY
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.0
@@ -338,6 +338,39 @@ ALTER SEQUENCE public.teams_id_seq OWNED BY public.teams.id;
 
 
 --
+-- Name: ticket_groups; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ticket_groups (
+    id bigint NOT NULL,
+    retrospective_id bigint NOT NULL,
+    title character varying,
+    created_by_id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: ticket_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ticket_groups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ticket_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ticket_groups_id_seq OWNED BY public.ticket_groups.id;
+
+
+--
 -- Name: tickets; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -349,7 +382,9 @@ CREATE TABLE public.tickets (
     content text NOT NULL,
     "position" integer DEFAULT 0,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    is_revealed boolean DEFAULT false NOT NULL,
+    ticket_group_id bigint
 );
 
 
@@ -469,6 +504,13 @@ ALTER TABLE ONLY public.teams ALTER COLUMN id SET DEFAULT nextval('public.teams_
 
 
 --
+-- Name: ticket_groups id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ticket_groups ALTER COLUMN id SET DEFAULT nextval('public.ticket_groups_id_seq'::regclass);
+
+
+--
 -- Name: tickets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -568,6 +610,14 @@ ALTER TABLE ONLY public.solid_cable_messages
 
 ALTER TABLE ONLY public.teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ticket_groups ticket_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ticket_groups
+    ADD CONSTRAINT ticket_groups_pkey PRIMARY KEY (id);
 
 
 --
@@ -706,6 +756,20 @@ CREATE INDEX index_teams_on_creator_id ON public.teams USING btree (creator_id);
 
 
 --
+-- Name: index_ticket_groups_on_created_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ticket_groups_on_created_by_id ON public.ticket_groups USING btree (created_by_id);
+
+
+--
+-- Name: index_ticket_groups_on_retrospective_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_ticket_groups_on_retrospective_id ON public.ticket_groups USING btree (retrospective_id);
+
+
+--
 -- Name: index_tickets_on_author_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -727,10 +791,24 @@ CREATE INDEX index_tickets_on_retrospective_id ON public.tickets USING btree (re
 
 
 --
+-- Name: index_tickets_on_retrospective_id_and_is_revealed; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_retrospective_id_and_is_revealed ON public.tickets USING btree (retrospective_id, is_revealed);
+
+
+--
 -- Name: index_tickets_on_retrospective_id_and_position; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_tickets_on_retrospective_id_and_position ON public.tickets USING btree (retrospective_id, "position");
+
+
+--
+-- Name: index_tickets_on_ticket_group_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_tickets_on_ticket_group_id ON public.tickets USING btree (ticket_group_id);
 
 
 --
@@ -845,6 +923,22 @@ ALTER TABLE ONLY public.pending_invitations
 
 
 --
+-- Name: ticket_groups fk_rails_cf0c9951a9; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ticket_groups
+    ADD CONSTRAINT fk_rails_cf0c9951a9 FOREIGN KEY (retrospective_id) REFERENCES public.retrospectives(id);
+
+
+--
+-- Name: ticket_groups fk_rails_d44b715483; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ticket_groups
+    ADD CONSTRAINT fk_rails_d44b715483 FOREIGN KEY (created_by_id) REFERENCES public.users(id);
+
+
+--
 -- Name: pending_invitations fk_rails_f1293202b5; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -853,14 +947,25 @@ ALTER TABLE ONLY public.pending_invitations
 
 
 --
+-- Name: tickets fk_rails_ffc1c7d483; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT fk_rails_ffc1c7d483 FOREIGN KEY (ticket_group_id) REFERENCES public.ticket_groups(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 8DlkzdyQuhNivrVT4eI0nSSgBWkKoNR1xYP91Ex5cXdsmloILgrm86O7pTxJAvW
+\unrestrict f9VqjDHy3Mi22jUkAsQ5IhLVIazacDtnxPtQCNMnXItZEb5xfiInAtMSfYvWCcY
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20251121095435'),
+('20251121095353'),
+('20251121095311'),
 ('20251120163540'),
 ('20251120105918'),
 ('20251120104357'),
