@@ -1,0 +1,7 @@
+<% users.each do |user| %>
+  <% colors = user_color(user) %>
+  <div class="w-12 h-12 rounded-full flex items-center justify-center text-base font-semibold border-2 border-white shadow-md"
+       style="background-color: <%= colors[:bg] %>; color: <%= colors[:text] %>;">
+    <%= user.username[0].upcase %>
+  </div>
+<% end %>
